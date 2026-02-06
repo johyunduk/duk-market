@@ -1,7 +1,7 @@
 {
   "name": "duk-market",
   "version": "0.1.0",
-  "description": "Claude Code 확장 마켓플레이스 - Skills, Agents, Hooks, MCP Servers, Plugins를 검색하고 설치할 수 있는 플러그인",
+  "description": "Claude Code 확장 마켓플레이스 + Gemini CLI 연동 - 확장 기능 관리와 AI 협업을 지원하는 플러그인",
   "author": {
     "name": "johyunduk"
   },
@@ -14,7 +14,10 @@
     "agents",
     "hooks",
     "mcp",
-    "plugins"
+    "plugins",
+    "gemini",
+    "gemini-cli",
+    "ai-collaboration"
   ],
   "skills": "./skills/",
   "agents": "./agents/",

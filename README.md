@@ -1,8 +1,8 @@
 # duk-market
 
-Claude Code 확장 마켓플레이스 플러그인.
+Claude Code 확장 마켓플레이스 + Gemini CLI 연동 플러그인.
 
-Skills, Agents, Hooks, MCP Servers, Plugins를 검색하고 설치할 수 있는 Claude Code 플러그인입니다.
+확장 기능을 검색/설치/관리하고, Gemini CLI를 활용한 AI 협업 워크플로우를 제공합니다.
 
 ## 설치
 
@@ -10,7 +10,18 @@ Skills, Agents, Hooks, MCP Servers, Plugins를 검색하고 설치할 수 있는
 claude plugin add johyunduk/duk-market
 ```
 
-## 사용법
+### Gemini CLI 연동 사전 준비 (선택)
+
+Gemini 관련 기능을 사용하려면:
+
+```bash
+npm install -g @google/gemini-cli
+gemini auth login
+# 또는
+export GEMINI_API_KEY="your-key"
+```
+
+## 마켓플레이스 기능
 
 ### 확장 기능 탐색
 
@@ -65,9 +76,52 @@ claude plugin add johyunduk/duk-market
 /market-publish --type skill # 스킬로 패키징
 ```
 
+## Gemini CLI 연동 기능
+
+분석은 Gemini, 구현은 Claude Code - 두 AI의 장점을 결합합니다.
+
+### 분석 위임
+
+Gemini가 분석/설계하고 Claude Code가 구현합니다:
+
+```
+/gemini-analyze 이 프로젝트에 사용자 인증 기능을 추가해줘
+/gemini-analyze 현재 API의 성능 병목을 찾고 최적화해줘
+/gemini-analyze 이 코드를 마이크로서비스로 리팩토링할 계획을 세워줘
+```
+
+### 코드 리뷰
+
+Gemini가 리뷰하고 Claude Code가 수정합니다:
+
+```
+/gemini-review                      # staged/unstaged 변경 리뷰
+/gemini-review src/auth/login.ts    # 특정 파일 리뷰
+/gemini-review --pr 42              # PR 리뷰
+```
+
+### 기술 리서치
+
+Gemini의 검색 능력으로 조사하고 Claude Code가 적용합니다:
+
+```
+/gemini-research Next.js 15 서버 컴포넌트에서 스트리밍 SSR 구현 방법
+/gemini-research PostgreSQL 대용량 테이블 파티셔닝 전략
+/gemini-research Docker compose에서 ECONNREFUSED 에러 해결
+```
+
+### 직접 질문
+
+Gemini에게 직접 질문하고 second opinion을 받습니다:
+
+```
+/gemini-ask TypeScript 5.7의 새로운 기능은?
+/gemini-ask React Server Components vs Next.js App Router 차이점
+```
+
 ## 포함된 구성 요소
 
-### Skills
+### Skills - 마켓플레이스
 
 | 커맨드 | 설명 |
 |--------|------|
@@ -79,12 +133,22 @@ claude plugin add johyunduk/duk-market
 | `/market-list` | 설치된 확장 목록 |
 | `/market-publish` | 확장 기능 배포/패키징 |
 
+### Skills - Gemini 연동
+
+| 커맨드 | 설명 |
+|--------|------|
+| `/gemini-analyze` | Gemini 분석 → Claude 구현 |
+| `/gemini-review` | Gemini 리뷰 → Claude 수정 |
+| `/gemini-research` | Gemini 리서치 → Claude 적용 |
+| `/gemini-ask` | Gemini에게 직접 질문 |
+
 ### Agents
 
 | 에이전트 | 설명 |
 |---------|------|
-| `marketplace` | 복잡한 확장 탐색/설치 작업을 처리하는 범용 에이전트 |
-| `market-security` | 확장 기능의 보안을 검토하는 전문 에이전트 |
+| `marketplace` | 확장 탐색/설치 범용 에이전트 |
+| `market-security` | 확장 보안 검토 에이전트 |
+| `gemini-bridge` | Gemini CLI 연동 브릿지 에이전트 |
 
 ### Hooks
 
