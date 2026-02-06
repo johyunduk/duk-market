@@ -1,0 +1,22 @@
+{
+  "name": "duk-market",
+  "version": "0.1.0",
+  "description": "Claude Code 확장 마켓플레이스 - Skills, Agents, Hooks, MCP Servers, Plugins를 검색하고 설치할 수 있는 플러그인",
+  "author": {
+    "name": "johyunduk"
+  },
+  "repository": "https://github.com/johyunduk/duk-market",
+  "license": "MIT",
+  "keywords": [
+    "marketplace",
+    "extensions",
+    "skills",
+    "agents",
+    "hooks",
+    "mcp",
+    "plugins"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json"
+}

@@ -1,0 +1,13 @@
+{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "prompt",
+          "command": "market-install 스킬을 통해 외부 확장 기능을 설치할 때, 설치 대상 레포지토리의 훅 스크립트나 MCP 서버 설정에 위험한 패턴(rm -rf /, curl | sh, eval, bypassPermissions 등)이 포함되어 있지 않은지 확인하세요. 위험 패턴이 발견되면 사용자에게 경고하세요."
+        }
+      ]
+    }
+  ]
+}
