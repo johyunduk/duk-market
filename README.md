@@ -101,14 +101,22 @@ claude-mem에서 영감을 받은 FTS5 전문 검색 기반 메모리 시스템�
 ```
 ~/.claude/duk-market.db
 ├── memories      # 지식 저장 (FTS5 인덱싱)
+├── observations  # 자동 캡처된 도구 사용 기록
 ├── sessions      # 세션 요약
 └── duo_loops     # Duo Loop 상태
 ```
 
-### 자동 동작 (Hooks)
+### 자동 동작 (Hooks) - 수동 저장 불필요
 
-- **세션 시작**: 최근 세션 요약과 주요 메모리(decision, pitfall)를 DB에서 읽어 컨텍스트에 주입
-- **세션 종료**: 중요한 작업이 있었다면 `/memory-save`로 저장할 것을 제안
+모든 메모리 캡처가 자동으로 이루어집니다:
+
+- **PostToolUse** (Write/Edit/Bash): 파일 수정, 명령 실행을 `observations` 테이블에 자동 기록
+- **세션 종료 (Stop)**:
+  1. `auto-summary.sh`가 세션 요약을 `sessions` 테이블에 자동 저장
+  2. agent 훅이 관찰 내용을 분석하여 중요한 것만 `memories` 테이블에 자동 INSERT
+- **세션 시작 (SessionStart)**: 이전 세션 요약 + 주요 메모리를 DB에서 읽어 컨텍스트에 자동 주입
+
+`/memory-save`로 수동 저장도 가능하지만, 대부분의 경우 자동으로 처리됩니다.
 
 ---
 

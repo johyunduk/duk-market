@@ -10,6 +10,19 @@
       ]
     }
   ],
+  "PostToolUse": [
+    {
+      "matcher": "Write|Edit|Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "~/.claude/plugins/duk-market/scripts/auto-observe.sh",
+          "timeout": 5,
+          "async": true
+        }
+      ]
+    }
+  ],
   "SessionStart": [
     {
       "matcher": "",
@@ -26,8 +39,13 @@
       "matcher": "",
       "hooks": [
         {
-          "type": "prompt",
-          "command": "세션이 끝나려 합니다. 이번 세션에서 중요한 결정사항, 버그 수정, 새로 알게 된 패턴이 있었다면 사용자에게 /memory-save 또는 /memory-summary로 저장할 것을 제안하세요. 단, 간단한 작업이었다면 제안하지 마세요."
+          "type": "command",
+          "command": "~/.claude/plugins/duk-market/scripts/auto-summary.sh",
+          "timeout": 10
+        },
+        {
+          "type": "agent",
+          "command": "세션이 끝납니다. ~/.claude/duk-market.db의 observations 테이블에서 현재 session_id의 기록을 확인하세요. 이번 세션에서 의미 있는 작업(버그 수정, 아키텍처 결정, 새로운 패턴 발견 등)이 있었다면, 핵심 내용을 memories 테이블에 자동으로 INSERT하세요. category를 적절히 분류하고 title과 content를 요약하여 저장합니다. 사소한 작업(파일 읽기만, 간단한 질문 등)이었다면 아무것도 하지 마세요."
         }
       ]
     }

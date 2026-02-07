@@ -71,6 +71,20 @@ CREATE TRIGGER IF NOT EXISTS memories_au AFTER UPDATE ON memories BEGIN
   VALUES (new.id, new.title, new.content, new.tags, new.category);
 END;
 
+-- Observations: auto-captured tool use events
+CREATE TABLE IF NOT EXISTS observations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tool_name TEXT,
+  tool_input TEXT,
+  tool_output TEXT,
+  project TEXT,
+  session_id TEXT,
+  created_at DATETIME DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_observations_session ON observations(session_id);
+CREATE INDEX IF NOT EXISTS idx_observations_project ON observations(project);
+
 -- Index for common queries
 CREATE INDEX IF NOT EXISTS idx_memories_category ON memories(category);
 CREATE INDEX IF NOT EXISTS idx_memories_project ON memories(project);
