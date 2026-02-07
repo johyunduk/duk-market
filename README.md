@@ -1,6 +1,6 @@
 # duk-market
 
-Claude Code 올인원 플러그인 - 확장 마켓플레이스 + Gemini CLI 연동 + 공유 메모리 시스템.
+Claude Code 올인원 플러그인 - 확장 마켓플레이스 + Gemini CLI 연동 + 공유 메모리 + 듀얼 AI 루프.
 
 ## 설치
 
@@ -120,6 +120,63 @@ claude-mem에서 영감을 받았지만, SQLite 대신 **마크다운 파일 기
 
 ---
 
+## 4. Duo Loop - 듀얼 AI 교차 검증 루프
+
+Ralph Wiggum의 자기 참조 루프에서 영감을 받아, **Gemini와 Claude가 서로를 검증**하는 반복 루프입니다.
+
+```
+Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → 재검증 → ... → 완료
+```
+
+### 전체 루프 실행
+
+```
+/duo-loop 사용자 인증 API를 JWT 기반으로 구현해줘
+/duo-loop 결제 시스템에 Stripe 연동 추가
+/duo-loop 테스트 커버리지 80% 이상으로 올려줘
+```
+
+### 기존 코드 검증 루프
+
+```
+/duo-review src/api/                # 디렉토리 교차 검증
+/duo-review src/auth/login.ts       # 특정 파일
+/duo-review --focus security        # 보안 집중
+/duo-review src/ -r 5 --strict      # 엄격 모드 5라운드
+```
+
+### 상태 확인
+
+```
+/duo-status            # 현재 루프 상태
+/duo-status --history  # 루프 히스토리
+```
+
+### 루프 동작 방식
+
+각 라운드에서:
+
+1. **Gemini 검증**: 코드를 `gemini -p`로 보내 JSON 형식의 리뷰 결과 수신
+2. **Claude 평가**: 각 이슈를 코드에서 직접 확인
+   - **수용**: 실제 문제 → 수정 진행
+   - **거부**: 오탐(false positive) → 근거와 함께 기각
+   - **보류**: 현재 스코프 밖 → 나중에 처리
+3. **수정**: 수용한 이슈를 Claude가 수정
+4. **재검증**: 수정된 코드를 Gemini에게 다시 전달
+
+**종료 조건**: Gemini가 PASS 판정 (8/10 이상) 또는 최대 라운드 도달
+
+```
+🏁 Duo Loop 완료
+━━━━━━━━━━━━━━━
+작업: JWT 인증 구현
+라운드: 3/5
+점수: 6 → 8 → 9 📈
+수정: 5개 수용, 2개 거부
+```
+
+---
+
 ## 포함된 구성 요소
 
 ### Skills
@@ -143,6 +200,9 @@ claude-mem에서 영감을 받았지만, SQLite 대신 **마크다운 파일 기
 | `/memory-share` | Git으로 메모리 공유 |
 | `/memory-remove` | 메모리 삭제 |
 | `/memory-summary` | 세션 요약 저장 |
+| `/duo-loop` | Gemini↔Claude 전체 루프 (분석→구현→검증→수정) |
+| `/duo-review` | 기존 코드에 교차 검증 루프 실행 |
+| `/duo-status` | 루프 진행 상태/히스토리 확인 |
 
 ### Agents
 
@@ -152,13 +212,14 @@ claude-mem에서 영감을 받았지만, SQLite 대신 **마크다운 파일 기
 | `market-security` | 확장 보안 검토 에이전트 |
 | `gemini-bridge` | Gemini CLI 연동 브릿지 에이전트 |
 | `memory-manager` | 메모리 정리/품질 관리/CLAUDE.md 연동 에이전트 |
+| `duo-loop` | Gemini↔Claude 교차 검증 루프 관리 에이전트 |
 
 ### Hooks
 
 | 이벤트 | 설명 |
 |--------|------|
 | `PreToolUse:Bash` | 외부 확장 설치 시 보안 패턴 검증 |
-| `SessionStart` | 세션 시작 시 관련 메모리 컨텍스트 주입 |
+| `SessionStart` | 세션 시작 시 메모리 주입 + 중단된 Duo Loop 감지 |
 | `Stop` | 세션 종료 시 메모리 저장 제안 |
 
 ## 라이선스

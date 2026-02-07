@@ -16,7 +16,7 @@
       "hooks": [
         {
           "type": "prompt",
-          "command": "새 세션이 시작되었습니다. .claude/memories/ 디렉토리가 존재하면, 가장 최근 세션 요약(session 카테고리)과 최근 7일 이내의 중요 메모리(decision, pitfall 카테고리)를 읽어서 컨텍스트로 활용하세요. 파일이 없으면 무시하세요."
+          "command": "새 세션이 시작되었습니다. .claude/memories/ 디렉토리가 존재하면, 가장 최근 세션 요약(session 카테고리)과 최근 7일 이내의 중요 메모리(decision, pitfall 카테고리)를 읽어서 컨텍스트로 활용하세요. 파일이 없으면 무시하세요. 또한 .claude/duo-loop-state.json이 존재하고 status가 in_progress이면 중단된 Duo Loop가 있음을 사용자에게 알리세요."
         }
       ]
     }
