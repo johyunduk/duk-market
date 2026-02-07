@@ -1,99 +1,116 @@
 ---
 name: memory-list
-description: 저장된 모든 메모리를 카테고리별로 정리하여 목록으로 표시합니다
+description: SQLite DB에 저장된 모든 메모리를 카테고리별 통계와 함께 표시합니다
 user-invocable: true
-allowed-tools: Bash, Read, Grep, Glob
+allowed-tools: Bash, Read
 argument-hint: "[--category <type>] [--stats]"
 ---
 
-# Memory List - 메모리 목록
+# Memory List - 메모리 목록 및 통계
 
-저장된 모든 메모리를 카테고리별로 정리하여 보여줍니다.
+`~/.claude/duk-market.db`에서 저장된 메모리 목록을 조회합니다.
+
+## DB 경로
+
+```bash
+DB="${DUK_MARKET_DB:-$HOME/.claude/duk-market.db}"
+```
 
 ## 인자 파싱
 
-- `--category` 또는 `-c`: 특정 카테고리만 표시
+- `--category` 또는 `-c`: 특정 카테고리만
 - `--stats`: 통계만 표시
-- `--author` 또는 `-a`: 특정 작성자의 메모리만
-- `--tree`: 디렉토리 트리 형태로 표시
+- `--project` 또는 `-p`: 특정 프로젝트만
+- `--limit` 또는 `-n`: 표시 개수 (기본: 20)
 
-## 동작
+## 쿼리
 
-### 메모리 디렉토리 스캔
-
-다음 위치에서 `.md` 파일을 검색:
+### 카테고리별 목록 (기본)
 
 ```bash
-# 프로젝트 메모리
-find .claude/memories/ -name "*.md" -not -path "*/local/*" | sort
-
-# 개인 메모리
-find .claude/memories/local/ -name "*.md" 2>/dev/null | sort
-
-# 전역 메모리
-find ~/.claude/memories/ -name "*.md" 2>/dev/null | sort
+sqlite3 -header -column "$DB" "
+  SELECT id, category, title, author, project,
+         strftime('%Y-%m-%d', created_at) as date
+  FROM memories
+  ORDER BY category, created_at DESC
+  LIMIT $LIMIT;
+"
 ```
 
-각 파일의 frontmatter에서 `category`, `date`, `author`, `tags`를 파싱합니다.
+### 카테고리별 통계 (`--stats`)
+
+```bash
+sqlite3 -header -column "$DB" "
+  SELECT category, COUNT(*) as count
+  FROM memories
+  GROUP BY category
+  ORDER BY count DESC;
+"
+
+sqlite3 -header -column "$DB" "
+  SELECT project, COUNT(*) as count
+  FROM memories
+  GROUP BY project
+  ORDER BY count DESC;
+"
+
+sqlite3 "$DB" "SELECT COUNT(*) FROM memories;"
+sqlite3 "$DB" "SELECT COUNT(DISTINCT project) FROM memories;"
+```
+
+### 특정 카테고리
+
+```bash
+sqlite3 -header -column "$DB" "
+  SELECT id, title, substr(content,1,80) as preview, author,
+         strftime('%Y-%m-%d', created_at) as date
+  FROM memories
+  WHERE category = '$CATEGORY'
+  ORDER BY created_at DESC
+  LIMIT $LIMIT;
+"
+```
 
 ## 출력 형식
 
 ### 기본 목록
 
 ```
-📚 프로젝트 메모리
+📚 저장된 메모리
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📁 decision (2개)
-   📄 2026-02-06 API 인증 방식 JWT로 결정 (johyunduk)
-   📄 2026-02-05 DB는 PostgreSQL 사용 (kimdev)
+[decision] (2개)
+  #12 2026-02-06 API 인증 JWT로 결정 (my-app)
+  #8  2026-02-05 DB는 PostgreSQL 사용 (my-app)
 
-📁 bugfix (3개)
-   📄 2026-02-06 React useEffect 무한 루프 해결 (johyunduk)
-   📄 2026-02-04 CORS 에러 프록시 설정 (parkdev)
-   📄 2026-02-03 TypeScript strict null 오류 (kimdev)
+[bugfix] (3개)
+  #15 2026-02-06 useEffect 무한 루프 해결 (my-app)
+  #11 2026-02-04 CORS 프록시 설정 (api-server)
+  #9  2026-02-03 strict null 오류 (my-app)
 
-📁 pattern (1개)
-   📄 2026-02-05 API 응답 형식 통일 (kimdev)
-
-📁 setup (1개)
-   📄 2026-02-01 Docker compose 환경 설정 (johyunduk)
-
-📁 pitfall (0개)
-
-📁 snippet (1개)
-   📄 2026-02-04 재사용 가능한 fetch wrapper (parkdev)
-
-📁 til (2개)
-   📄 2026-02-06 서버 컴포넌트에서 useState 불가 (johyunduk)
-   📄 2026-02-05 Git rebase vs merge 차이 (kimdev)
+[pattern] (1개)
+  #10 2026-02-05 API 응답 형식 통일 (my-app)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-총 10개 메모리 | 작성자 3명 | 최근: 2026-02-06
+총 6개 메모리 | 2개 프로젝트
 ```
 
-### 통계 모드 (`--stats`)
+### 통계 (`--stats`)
 
 ```
 📊 메모리 통계
 ━━━━━━━━━━━━━━━━━━━━━━━━
 
 카테고리별:
+  bugfix    ██████████  3개
   decision  ██████░░░░  2개
-  bugfix    █████████░  3개
   pattern   ███░░░░░░░  1개
-  setup     ███░░░░░░░  1개
-  snippet   ███░░░░░░░  1개
-  til       ██████░░░░  2개
 
-작성자별:
-  johyunduk  █████████░  4개
-  kimdev     █████████░  4개
-  parkdev    ██████░░░░  2개
+프로젝트별:
+  my-app     ████████░░  5개
+  api-server ██░░░░░░░░  1개
 
-최근 7일:   8개
-최근 30일:  10개
-전체:       10개
+전체: 6개 | 최근 7일: 4개
 ```
 
 ## 사용 예시
@@ -101,6 +118,6 @@ find ~/.claude/memories/ -name "*.md" 2>/dev/null | sort
 ```
 /memory-list                # 전체 목록
 /memory-list -c bugfix      # 버그 수정만
-/memory-list --stats         # 통계
-/memory-list -a johyunduk   # 특정 작성자
+/memory-list --stats        # 통계
+/memory-list -p my-app      # 특정 프로젝트
 ```

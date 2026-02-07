@@ -1,6 +1,6 @@
 # duk-market
 
-Claude Code 올인원 플러그인 - 확장 마켓플레이스 + Gemini CLI 연동 + 공유 메모리 + 듀얼 AI 루프.
+Claude Code 올인원 플러그인 - 확장 마켓플레이스 + Gemini CLI 연동 + 로컬 메모리(SQLite) + 듀얼 AI 루프.
 
 ## 설치
 
@@ -54,10 +54,17 @@ gemini auth login  # 또는 export GEMINI_API_KEY="your-key"
 
 ---
 
-## 3. 공유 메모리 시스템
+## 3. 로컬 메모리 시스템
 
-세션에서 얻은 지식을 마크다운 파일로 저장하고, Git으로 팀과 공유합니다.
-claude-mem에서 영감을 받았지만, SQLite 대신 **마크다운 파일 기반**으로 Git 친화적입니다.
+세션에서 얻은 지식을 로컬 SQLite DB(`~/.claude/duk-market.db`)에 저장합니다.
+claude-mem에서 영감을 받은 FTS5 전문 검색 기반 메모리 시스템입니다.
+
+### 초기 설정
+
+```bash
+# DB 자동 초기화 (첫 사용 시 자동 실행됨)
+# 또는 수동: bash scripts/init-db.sh
+```
 
 ### 메모리 저장
 
@@ -67,55 +74,40 @@ claude-mem에서 영감을 받았지만, SQLite 대신 **마크다운 파일 기
 /memory-save decision DB는 PostgreSQL 사용 - 이유: JSON 지원, 성숙한 생태계
 /memory-save setup Docker compose 전에 .env.local 필요
 /memory-save pitfall Next.js 서버 컴포넌트에서 useState 사용 불가
-/memory-save snippet 재사용 가능한 fetch wrapper 코드
 /memory-save 오늘 배운 것: Git rebase vs merge 차이   # 카테고리 자동 분류
 ```
 
-### 메모리 검색
+### 메모리 검색 (FTS5)
 
 ```
-/memory-recall useEffect                    # 키워드 검색
+/memory-recall useEffect                    # 전문 검색
 /memory-recall react -c bugfix              # 카테고리 필터
-/memory-recall -a johyunduk                 # 작성자 필터
 /memory-recall docker -r 7                  # 최근 7일 이내
+/memory-recall --id 42                      # ID로 상세 보기
 ```
 
 ### 메모리 관리
 
 ```
 /memory-list                # 전체 목록
-/memory-list --stats        # 통계 (카테고리별, 작성자별)
-/memory-remove old-memo     # 삭제
+/memory-list --stats        # 통계 (카테고리별, 프로젝트별)
+/memory-remove 42           # ID로 삭제
+/memory-remove -c til       # 카테고리 전체 삭제
 /memory-summary             # 현재 세션 요약 저장
 ```
 
-### 메모리 공유
+### DB 구조
 
 ```
-/memory-share               # 새 메모리를 Git 커밋
-/memory-share --push        # 커밋 + 푸시
-/memory-share --export ~/backup/memories    # 내보내기
-/memory-share --import ../other-project/.claude/memories  # 가져오기
-```
-
-### 메모리 저장 구조
-
-```
-.claude/memories/
-├── decision/    # 아키텍처/설계 결정사항
-├── bugfix/      # 버그 수정 기록과 원인
-├── pattern/     # 코드 패턴, 관례
-├── setup/       # 환경 설정, 설치 절차
-├── pitfall/     # 주의사항
-├── snippet/     # 코드 스니펫
-├── til/         # Today I Learned
-├── session/     # 세션 요약 (자동)
-└── local/       # 개인 메모 (gitignored)
+~/.claude/duk-market.db
+├── memories      # 지식 저장 (FTS5 인덱싱)
+├── sessions      # 세션 요약
+└── duo_loops     # Duo Loop 상태
 ```
 
 ### 자동 동작 (Hooks)
 
-- **세션 시작**: 최근 세션 요약과 주요 메모리(decision, pitfall)를 자동으로 컨텍스트에 주입
+- **세션 시작**: 최근 세션 요약과 주요 메모리(decision, pitfall)를 DB에서 읽어 컨텍스트에 주입
 - **세션 종료**: 중요한 작업이 있었다면 `/memory-save`로 저장할 것을 제안
 
 ---
@@ -194,10 +186,9 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 | `/gemini-review` | Gemini 리뷰 → Claude 수정 |
 | `/gemini-research` | Gemini 리서치 → Claude 적용 |
 | `/gemini-ask` | Gemini에게 직접 질문 |
-| `/memory-save` | 지식/결정사항 저장 |
-| `/memory-recall` | 메모리 검색 |
+| `/memory-save` | SQLite에 지식 저장 |
+| `/memory-recall` | FTS5 전문 검색 |
 | `/memory-list` | 메모리 목록/통계 |
-| `/memory-share` | Git으로 메모리 공유 |
 | `/memory-remove` | 메모리 삭제 |
 | `/memory-summary` | 세션 요약 저장 |
 | `/duo-loop` | Gemini↔Claude 전체 루프 (분석→구현→검증→수정) |
@@ -211,7 +202,7 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 | `marketplace` | 확장 탐색/설치 범용 에이전트 |
 | `market-security` | 확장 보안 검토 에이전트 |
 | `gemini-bridge` | Gemini CLI 연동 브릿지 에이전트 |
-| `memory-manager` | 메모리 정리/품질 관리/CLAUDE.md 연동 에이전트 |
+| `memory-manager` | SQLite 메모리 정리/품질 관리/CLAUDE.md 연동 에이전트 |
 | `duo-loop` | Gemini↔Claude 교차 검증 루프 관리 에이전트 |
 
 ### Hooks

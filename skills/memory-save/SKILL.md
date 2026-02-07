@@ -1,15 +1,46 @@
 ---
 name: memory-save
-description: 세션에서 얻은 지식, 결정사항, 버그 수정, 패턴 등을 마크다운 메모리 파일로 저장합니다
+description: 세션에서 얻은 지식, 결정사항, 버그 수정, 패턴 등을 로컬 SQLite DB에 저장합니다
 user-invocable: true
-allowed-tools: Bash, Read, Write, Edit, Grep, Glob
+allowed-tools: Bash, Read, Grep, Glob
 argument-hint: "<카테고리> <내용>"
 ---
 
-# Memory Save - 지식 저장
+# Memory Save - 로컬 SQLite에 지식 저장
 
-세션에서 얻은 지식을 마크다운 파일로 저장합니다.
-저장된 메모리는 Git으로 공유할 수 있어 팀원 간 지식 공유가 가능합니다.
+세션에서 얻은 지식을 `~/.claude/duk-market.db`에 저장합니다.
+
+## DB 경로 및 초기화
+
+```bash
+DB="${DUK_MARKET_DB:-$HOME/.claude/duk-market.db}"
+
+# DB가 없으면 초기화
+if [ ! -f "$DB" ]; then
+  mkdir -p "$(dirname "$DB")"
+  sqlite3 "$DB" "
+    CREATE TABLE IF NOT EXISTS memories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      category TEXT NOT NULL DEFAULT 'til',
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      tags TEXT DEFAULT '[]',
+      author TEXT,
+      project TEXT,
+      created_at DATETIME DEFAULT (datetime('now','localtime')),
+      updated_at DATETIME DEFAULT (datetime('now','localtime'))
+    );
+    CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts USING fts5(
+      title, content, tags, category,
+      content='memories', content_rowid='id'
+    );
+    CREATE TRIGGER IF NOT EXISTS memories_ai AFTER INSERT ON memories BEGIN
+      INSERT INTO memories_fts(rowid,title,content,tags,category)
+      VALUES (new.id,new.title,new.content,new.tags,new.category);
+    END;
+  "
+fi
+```
 
 ## 인자 파싱
 
@@ -17,92 +48,52 @@ argument-hint: "<카테고리> <내용>"
 - `<category> <content>` - 카테고리와 내용 지정
 - `<content>` - 카테고리 자동 분류
 
-카테고리:
-- `decision` - 아키텍처/설계 결정사항
-- `bugfix` - 버그 수정 기록과 원인
-- `pattern` - 코드 패턴, 관례
-- `setup` - 환경 설정, 설치 절차
-- `pitfall` - 주의사항, 실수하기 쉬운 것
-- `snippet` - 유용한 코드 스니펫
-- `til` - Today I Learned (오늘 배운 것)
+카테고리: `decision`, `bugfix`, `pattern`, `setup`, `pitfall`, `snippet`, `til`
 
-## 저장 위치
+자동 분류 힌트:
+- "버그", "수정", "에러", "fix" → `bugfix`
+- "결정", "선택", "쓰기로" → `decision`
+- "패턴", "관례", "컨벤션" → `pattern`
+- "설정", "설치", "환경" → `setup`
+- "주의", "조심", "하면 안" → `pitfall`
+- 기타 → `til`
 
-메모리 파일 저장 위치:
-- **프로젝트 공유**: `.claude/memories/` (Git에 커밋하여 팀 공유)
-- **개인 메모**: `.claude/memories/local/` (`.gitignore`에 추가)
-- **전역 메모**: `~/.claude/memories/` (모든 프로젝트에서 사용)
-
-## 저장 형식
-
-각 메모리는 개별 마크다운 파일로 저장합니다:
-
-**파일 경로**: `.claude/memories/<category>/<YYYY-MM-DD>-<slug>.md`
-
-**파일 내용**:
-```markdown
----
-category: <category>
-tags: [tag1, tag2]
-author: <git user.name>
-date: <YYYY-MM-DD HH:mm>
-project: <프로젝트 이름>
-session: <세션 ID (있으면)>
----
-
-# <제목>
-
-<내용>
-
-## 관련 파일
-- `path/to/file.ts` - 설명
-
-## 컨텍스트
-<이 메모리가 생긴 배경/상황>
-```
-
-## 동작 절차
-
-### 1단계: 저장 디렉토리 확인
+## 저장
 
 ```bash
-# 프로젝트 메모리 디렉토리 생성
-mkdir -p .claude/memories/{decision,bugfix,pattern,setup,pitfall,snippet,til}
+AUTHOR=$(git config user.name 2>/dev/null || echo "unknown")
+PROJECT=$(basename "$(pwd)")
+
+# 작은따옴표 이스케이프 필수
+SAFE_TITLE=$(echo "$TITLE" | sed "s/'/''/g")
+SAFE_CONTENT=$(echo "$CONTENT" | sed "s/'/''/g")
+
+sqlite3 "$DB" "INSERT INTO memories (category, title, content, tags, author, project)
+  VALUES ('$CATEGORY', '$SAFE_TITLE', '$SAFE_CONTENT', '$TAGS_JSON', '$AUTHOR', '$PROJECT');"
+
+# 삽입된 ID 확인
+ID=$(sqlite3 "$DB" "SELECT last_insert_rowid();")
 ```
 
-### 2단계: 메모리 내용 구성
-
-사용자의 `$ARGUMENTS`를 분석하여:
-1. 카테고리가 명시되지 않았으면 내용에서 자동 분류
-2. 제목을 slug로 변환 (예: "React 렌더링 최적화" → `react-rendering-optimization`)
-3. 태그를 내용에서 추출
-4. `git config user.name`으로 작성자 기록
-
-### 3단계: 파일 생성
-
-마크다운 파일을 생성합니다.
-
-### 4단계: 확인 출력
+## 출력 형식
 
 ```
-💾 메모리 저장 완료
+💾 메모리 저장 완료 (ID: $ID)
 ━━━━━━━━━━━━━━━━━━━━━━━━
-
 카테고리: bugfix
-제목:    React useEffect 무한 루프 해결
-태그:    react, hooks, useEffect
-파일:    .claude/memories/bugfix/2026-02-06-react-useeffect-infinite-loop.md
-작성자:  johyunduk
+제목:     React useEffect 무한 루프 해결
+태그:     react, hooks, useEffect
+프로젝트: my-app
 
-💡 팀과 공유하려면: git add .claude/memories/ && git commit -m "memory: ..."
-   또는: /memory-share
+💡 검색: /memory-recall useEffect
+   목록: /memory-list -c bugfix
 ```
 
 ## 사용 예시
 
 ```
-/memory-save bugfix useEffect 의존성 배열에 객체를 넣으면 매번 새 참조라 무한 루프 발생. useMemo로 감싸서 해결
-/memory-save pattern 이 프로젝트에서는 API 응답을 항상 { data, error, meta } 형태로 통일
-/memory-save setup Docker compose 실행 전에 .env.local 파일 필요. TEMPLATE.env 복사 후 수정
-/memory-save 오늘 알게된 건데 Next.js에서 서버 컴포넌트는 useState를 쓸 수 없다
+/memory-save bugfix useEffect 의존성 배열에 객체를 넣으면 무한 루프 발생. useMemo로 해결
+/memory-save pattern API 응답은 항상 { data, error, meta } 형태로 통일
+/memory-save decision DB는 PostgreSQL 사용 - JSON 지원, 성숙한 생태계
+/memory-save 오늘 배운 것: Next.js 서버 컴포넌트에서 useState 사용 불가
 ```
