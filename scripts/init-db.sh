@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS memories (
   author TEXT,
   project TEXT,
   session_id TEXT,
+  importance INTEGER DEFAULT 3,
   created_at DATETIME DEFAULT (datetime('now', 'localtime')),
   updated_at DATETIME DEFAULT (datetime('now', 'localtime'))
 );

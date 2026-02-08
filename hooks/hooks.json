@@ -28,8 +28,9 @@
       "matcher": "",
       "hooks": [
         {
-          "type": "prompt",
-          "command": "새 세션이 시작되었습니다. ~/.claude/duk-market.db 파일이 존재하면, sqlite3 명령으로 (1) sessions 테이블에서 현재 프로젝트의 가장 최근 세션 요약을 조회하고 (2) memories 테이블에서 현재 프로젝트의 decision, pitfall 카테고리 최근 항목을 조회하여 컨텍스트로 활용하세요. DB가 없으면 무시하세요. 또한 duo_loops 테이블에서 status가 in_progress인 행이 있으면 중단된 Duo Loop가 있음을 사용자에게 알리세요."
+          "type": "command",
+          "command": "~/.claude/plugins/duk-market/scripts/load-context.sh",
+          "timeout": 5
         }
       ]
     }
@@ -45,7 +46,7 @@
         },
         {
           "type": "agent",
-          "command": "세션이 끝납니다. ~/.claude/duk-market.db의 observations 테이블에서 현재 session_id의 기록을 확인하세요. 이번 세션에서 의미 있는 작업(버그 수정, 아키텍처 결정, 새로운 패턴 발견 등)이 있었다면, 핵심 내용을 memories 테이블에 자동으로 INSERT하세요. category를 적절히 분류하고 title과 content를 요약하여 저장합니다. 사소한 작업(파일 읽기만, 간단한 질문 등)이었다면 아무것도 하지 마세요."
+          "command": "세션이 끝납니다. 아래 기준에 따라 메모리 저장 여부를 판단하세요.\n\n## 판단 기준\n\n1. observations 테이블에서 현재 session_id의 tool_name='Write' 또는 'Edit' 기록이 3개 이상 → 의미 있는 작업 세션\n2. Bash 도구로 git commit이 실행된 기록이 있으면 → 커밋 메시지를 memories에 저장 (category: 'til')\n3. observations에서 에러 수정 패턴 발견 (같은 파일을 3회 이상 수정, 또는 Bash에서 에러 후 Edit) → category: 'bugfix'\n4. 새로운 파일 생성이 3개 이상 → 아키텍처 결정으로 category: 'decision'\n5. 위 기준에 해당하지 않으면 (파일 읽기만, 간단한 질문 등) → 아무것도 저장하지 마세요\n\n## 저장 방법\n\nDB 경로: ~/.claude/duk-market.db\nPROJECT: 현재 디렉토리 basename\nimportance: 자동 저장이므로 3으로 설정\n\nsqlite3 \"$DB\" \"INSERT INTO memories (category, title, content, tags, project, importance, session_id) VALUES (...);\"\n\ntitle은 50자 이내로 핵심만, content는 200자 이내로 요약하세요."
         }
       ]
     }

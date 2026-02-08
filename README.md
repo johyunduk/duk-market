@@ -110,13 +110,33 @@ claude-mem에서 영감을 받은 FTS5 전문 검색 기반 메모리 시스템�
 
 모든 메모리 캡처가 자동으로 이루어집니다:
 
-- **PostToolUse** (Write/Edit/Bash): 파일 수정, 명령 실행을 `observations` 테이블에 자동 기록
+- **PostToolUse** (Write/Edit/Bash): 파일 수정, 명령 실행을 `observations` 테이블에 자동 기록 (async)
 - **세션 종료 (Stop)**:
-  1. `auto-summary.sh`가 세션 요약을 `sessions` 테이블에 자동 저장
-  2. agent 훅이 관찰 내용을 분석하여 중요한 것만 `memories` 테이블에 자동 INSERT
-- **세션 시작 (SessionStart)**: 이전 세션 요약 + 주요 메모리를 DB에서 읽어 컨텍스트에 자동 주입
+  1. `auto-summary.sh`가 세션 요약을 `sessions` 테이블에 자동 저장 + 오래된 데이터 정리
+  2. agent 훅이 관찰 내용을 분석하여 중요한 것만 `memories` 테이블에 자동 INSERT (importance=3)
+- **세션 시작 (SessionStart)**: `load-context.sh`가 DB에서 직접 쿼리하여 zero-turn 컨텍스트 주입
+  - 이전 세션 요약 (최근 1건)
+  - 주요 결정사항 (최근 5건)
+  - 주의사항 (최근 5건)
+  - 최근 버그 수정 (7일 이내, 3건)
+  - 중단된 Duo Loop 감지
 
-`/memory-save`로 수동 저장도 가능하지만, 대부분의 경우 자동으로 처리됩니다.
+`/memory-save`로 수동 저장도 가능하며, 수동 저장은 importance=5로 영구 보관됩니다.
+
+### 중요도 및 자동 만료
+
+| importance | 저장 방식 | 만료 정책 |
+|-----------|----------|----------|
+| 5 | 수동 (`/memory-save`) | 영구 보관 |
+| 3 | 자동 (Stop 훅) | `til` 카테고리만 90일 후 자동 삭제 |
+| - | `decision`, `pitfall` | 중요도 무관 영구 보관 |
+
+### 자동 정리 (Stop 훅)
+
+- 완료된 세션의 observations 자동 삭제
+- 30일 이상 된 observations 자동 삭제
+- sessions 테이블 최근 50건만 유지
+- importance ≤ 3인 `til` 카테고리 메모리 90일 후 자동 만료
 
 ---
 
@@ -215,11 +235,12 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 
 ### Hooks
 
-| 이벤트 | 설명 |
-|--------|------|
-| `PreToolUse:Bash` | 외부 확장 설치 시 보안 패턴 검증 |
-| `SessionStart` | 세션 시작 시 메모리 주입 + 중단된 Duo Loop 감지 |
-| `Stop` | 세션 종료 시 메모리 저장 제안 |
+| 이벤트 | 타입 | 설명 |
+|--------|------|------|
+| `PreToolUse:Bash` | prompt | 외부 확장 설치 시 보안 패턴 검증 |
+| `PostToolUse:Write\|Edit\|Bash` | command (async) | 도구 사용 기록을 observations에 자동 캡처 |
+| `SessionStart` | command | `load-context.sh` - DB에서 직접 쿼리, zero-turn 컨텍스트 주입 |
+| `Stop` | command + agent | 세션 요약 저장 + 데이터 정리 + 조건부 메모리 자동 INSERT |
 
 ## 라이선스
 

@@ -27,6 +27,8 @@ if [ ! -f "$DB" ]; then
       tags TEXT DEFAULT '[]',
       author TEXT,
       project TEXT,
+      session_id TEXT,
+      importance INTEGER DEFAULT 3,
       created_at DATETIME DEFAULT (datetime('now','localtime')),
       updated_at DATETIME DEFAULT (datetime('now','localtime'))
     );
@@ -58,18 +60,30 @@ fi
 - "주의", "조심", "하면 안" → `pitfall`
 - 기타 → `til`
 
+## importance (중요도) 레벨
+
+수동 `/memory-save`로 저장하면 **importance = 5** (사용자가 직접 저장한 것은 중요)
+자동 Stop 훅에서 저장되면 **importance = 3** (기본값)
+
+중요도에 따른 자동 만료:
+- importance 1-3: `til` 카테고리는 90일 후 자동 삭제
+- importance 4-5: 영구 보관
+- `decision`, `pitfall` 카테고리: 중요도 무관 영구 보관
+
 ## 저장
 
 ```bash
 AUTHOR=$(git config user.name 2>/dev/null || echo "unknown")
 PROJECT=$(basename "$(pwd)")
+SESSION_ID="${CLAUDE_SESSION_ID:-unknown}"
+IMPORTANCE=5  # 수동 저장은 항상 높은 중요도
 
 # 작은따옴표 이스케이프 필수
 SAFE_TITLE=$(echo "$TITLE" | sed "s/'/''/g")
 SAFE_CONTENT=$(echo "$CONTENT" | sed "s/'/''/g")
 
-sqlite3 "$DB" "INSERT INTO memories (category, title, content, tags, author, project)
-  VALUES ('$CATEGORY', '$SAFE_TITLE', '$SAFE_CONTENT', '$TAGS_JSON', '$AUTHOR', '$PROJECT');"
+sqlite3 "$DB" "INSERT INTO memories (category, title, content, tags, author, project, session_id, importance)
+  VALUES ('$CATEGORY', '$SAFE_TITLE', '$SAFE_CONTENT', '$TAGS_JSON', '$AUTHOR', '$PROJECT', '$SESSION_ID', $IMPORTANCE);"
 
 # 삽입된 ID 확인
 ID=$(sqlite3 "$DB" "SELECT last_insert_rowid();")
@@ -78,15 +92,16 @@ ID=$(sqlite3 "$DB" "SELECT last_insert_rowid();")
 ## 출력 형식
 
 ```
-💾 메모리 저장 완료 (ID: $ID)
+메모리 저장 완료 (ID: $ID)
 ━━━━━━━━━━━━━━━━━━━━━━━━
 카테고리: bugfix
+중요도:   5 (수동 저장)
 제목:     React useEffect 무한 루프 해결
 태그:     react, hooks, useEffect
 프로젝트: my-app
 
-💡 검색: /memory-recall useEffect
-   목록: /memory-list -c bugfix
+검색: /memory-recall useEffect
+목록: /memory-list -c bugfix
 ```
 
 ## 사용 예시

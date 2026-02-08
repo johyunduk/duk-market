@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # duk-market: Auto-save session summary on Stop event
-# Collects observations from current session and stores a summary
+# Collects observations from current session, stores a summary,
+# then cleans up old observations
 
 set -e
 
@@ -34,6 +35,8 @@ OBS_COUNT=$(sqlite3 "$DB" "SELECT COUNT(*) FROM observations WHERE session_id = 
 
 # Skip if no meaningful work was done
 if [ "$OBS_COUNT" -lt 2 ]; then
+  # Still clean up old data even if session was trivial
+  sqlite3 "$DB" "DELETE FROM observations WHERE created_at < datetime('now', '-30 days', 'localtime');" 2>/dev/null || true
   exit 0
 fi
 
@@ -62,5 +65,28 @@ STARTED=$(sqlite3 "$DB" "
 # Insert session record
 sqlite3 "$DB" "INSERT INTO sessions (session_id, project, files_changed, tools_used, started_at)
   VALUES ('$SESSION_ID', '$PROJECT', '$SAFE_FILES', $OBS_COUNT, '$STARTED');"
+
+# --- Cleanup ---
+
+# Delete observations for completed sessions (keep only current session's)
+sqlite3 "$DB" "DELETE FROM observations WHERE session_id != '$SESSION_ID';" 2>/dev/null || true
+
+# Delete observations older than 30 days (safety net)
+sqlite3 "$DB" "DELETE FROM observations WHERE created_at < datetime('now', '-30 days', 'localtime');" 2>/dev/null || true
+
+# Delete old sessions (keep last 50)
+sqlite3 "$DB" "
+  DELETE FROM sessions WHERE id NOT IN (
+    SELECT id FROM sessions ORDER BY ended_at DESC LIMIT 50
+  );
+" 2>/dev/null || true
+
+# Auto-expire old til memories (90 days), keep decision/pitfall permanently
+sqlite3 "$DB" "
+  DELETE FROM memories
+  WHERE category = 'til'
+    AND importance <= 3
+    AND created_at < datetime('now', '-90 days', 'localtime');
+" 2>/dev/null || true
 
 exit 0
