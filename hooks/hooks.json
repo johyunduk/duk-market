@@ -1,4 +1,16 @@
 {
+  "UserPromptSubmit": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "~/.claude/plugins/duk-market/scripts/auto-gemini.sh",
+          "timeout": 30
+        }
+      ]
+    }
+  ],
   "PreToolUse": [
     {
       "matcher": "Bash",

@@ -43,7 +43,21 @@ npm install -g @google/gemini-cli
 gemini auth login  # 또는 export GEMINI_API_KEY="your-key"
 ```
 
-### 사용법
+### @gemini 자동 트리거
+
+프롬프트에 `@gemini`를 포함하면 **자동으로 Gemini에게도 같은 질문**을 보내고, 양쪽 응답을 비교할 수 있습니다.
+
+```
+@gemini React 19의 새로운 use() 훅은 어떻게 쓰는거야?
+이 코드 리팩토링 어떻게 하면 좋을까? @gemini
+@gemini 이 에러 원인이 뭘까: Cannot read property of undefined
+```
+
+- 별도 커맨드 호출 없이 프롬프트에 `@gemini`만 넣으면 자동 작동
+- Gemini 응답이 Claude 컨텍스트에 주입되어, Claude가 참고하여 답변
+- Gemini CLI 미설치 시 안내 메시지 표시 (기존 Claude 응답에 영향 없음)
+
+### 슬래시 커맨드 (수동)
 
 ```
 /gemini-analyze 이 프로젝트에 인증 기능 추가해줘     # 분석→구현
@@ -237,6 +251,7 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 
 | 이벤트 | 타입 | 설명 |
 |--------|------|------|
+| `UserPromptSubmit` | command | `auto-gemini.sh` - `@gemini` 키워드 감지 시 자동 Gemini 호출 |
 | `PreToolUse:Bash` | prompt | 외부 확장 설치 시 보안 패턴 검증 |
 | `PostToolUse:Write\|Edit\|Bash` | command (async) | 도구 사용 기록을 observations에 자동 캡처 |
 | `SessionStart` | command | `load-context.sh` - DB에서 직접 쿼리, zero-turn 컨텍스트 주입 |
