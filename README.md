@@ -255,6 +255,7 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 | `/schema-save` | DDL 영구 저장 (버전 자동 관리) |
 | `/schema-list` | 프로젝트 스키마 현황 조회 |
 | `/schema-history` | 테이블별 DDL 변경 이력 |
+| `/laravel-review` | Laravel 전용 코드 리뷰 (구조/퍼포먼스/보안/아키텍처) |
 | `/duo-loop` | Gemini↔Claude 전체 루프 (분석→구현→검증→수정) |
 | `/duo-review` | 기존 코드에 교차 검증 루프 실행 |
 | `/duo-status` | 루프 진행 상태/히스토리 확인 |
