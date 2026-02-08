@@ -76,6 +76,52 @@ print(ti.get('command','')[:200] if isinstance(ti,dict) else '')
       SAFE_INPUT=$(echo "$TOOL_INPUT" | sed "s/'/''/g")
       sqlite3 "$DB" "INSERT INTO observations (tool_name, tool_input, project, session_id)
         VALUES ('Bash', '$SAFE_INPUT', '$PROJECT', '$SESSION_ID');"
+
+      # DDL auto-detection: capture CREATE/ALTER/DROP TABLE statements
+      DDL_MATCH=$(echo "$TOOL_INPUT" | grep -iE '(CREATE|ALTER|DROP)\s+(TABLE|INDEX|VIEW)' || echo "")
+      if [ -n "$DDL_MATCH" ]; then
+        # Ensure schemas table exists
+        sqlite3 "$DB" "
+          CREATE TABLE IF NOT EXISTS schemas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            table_name TEXT NOT NULL,
+            ddl TEXT NOT NULL,
+            version INTEGER DEFAULT 1,
+            change_type TEXT NOT NULL DEFAULT 'CREATE',
+            project TEXT,
+            session_id TEXT,
+            note TEXT,
+            created_at DATETIME DEFAULT (datetime('now','localtime'))
+          );
+        " 2>/dev/null
+
+        # Parse DDL details with python
+        echo "$TOOL_INPUT" | python3 -c "
+import sys, re
+
+text = sys.stdin.read()
+# Match CREATE/ALTER/DROP TABLE/INDEX/VIEW
+pattern = r'(CREATE|ALTER|DROP)\s+(TABLE|INDEX|VIEW)\s+(?:IF\s+(?:NOT\s+)?EXISTS\s+)?['\"\`]?(\w+)['\"\`]?'
+matches = re.findall(pattern, text, re.IGNORECASE)
+
+for change_type_word, obj_type, name in matches:
+    change_type = change_type_word.upper()
+    table_name = name
+    print(f'{change_type}|{table_name}')
+" 2>/dev/null | while IFS='|' read -r CHANGE_TYPE TABLE_NAME; do
+          if [ -n "$TABLE_NAME" ]; then
+            SAFE_DDL=$(echo "$TOOL_INPUT" | sed "s/'/''/g")
+            # Auto-increment version for same table_name + project
+            NEXT_VER=$(sqlite3 "$DB" "
+              SELECT COALESCE(MAX(version), 0) + 1
+              FROM schemas
+              WHERE table_name = '$TABLE_NAME' AND project = '$PROJECT';
+            ")
+            sqlite3 "$DB" "INSERT INTO schemas (table_name, ddl, version, change_type, project, session_id)
+              VALUES ('$TABLE_NAME', '$SAFE_DDL', $NEXT_VER, '$CHANGE_TYPE', '$PROJECT', '$SESSION_ID');"
+          fi
+        done
+      fi
     fi
     ;;
 esac

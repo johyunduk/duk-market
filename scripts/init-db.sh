@@ -86,6 +86,22 @@ CREATE TABLE IF NOT EXISTS observations (
 CREATE INDEX IF NOT EXISTS idx_observations_session ON observations(session_id);
 CREATE INDEX IF NOT EXISTS idx_observations_project ON observations(project);
 
+-- Schemas: DDL permanent storage with version tracking
+CREATE TABLE IF NOT EXISTS schemas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  table_name TEXT NOT NULL,
+  ddl TEXT NOT NULL,
+  version INTEGER DEFAULT 1,
+  change_type TEXT NOT NULL DEFAULT 'CREATE',
+  project TEXT,
+  session_id TEXT,
+  note TEXT,
+  created_at DATETIME DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_schemas_table ON schemas(table_name);
+CREATE INDEX IF NOT EXISTS idx_schemas_project ON schemas(project);
+
 -- Index for common queries
 CREATE INDEX IF NOT EXISTS idx_memories_category ON memories(category);
 CREATE INDEX IF NOT EXISTS idx_memories_project ON memories(project);

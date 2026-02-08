@@ -115,16 +115,35 @@ claude-mem에서 영감을 받은 FTS5 전문 검색 기반 메모리 시스템�
 ```
 ~/.claude/duk-market.db
 ├── memories      # 지식 저장 (FTS5 인덱싱)
+├── schemas       # DDL 영구 저장 (버전 이력 관리)
 ├── observations  # 자동 캡처된 도구 사용 기록
 ├── sessions      # 세션 요약
 └── duo_loops     # Duo Loop 상태
 ```
 
+### 스키마(DDL) 영구 저장
+
+테이블 DDL을 **만료 없이 영구 보관**합니다. 일반 memories와 분리된 `schemas` 테이블에서 버전 이력을 관리합니다.
+
+```
+/schema-save CREATE TABLE users (id INT PRIMARY KEY, name TEXT, email TEXT UNIQUE)
+/schema-save ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'
+```
+
+```
+/schema-list                    # 현재 프로젝트 테이블 현황 (최신 버전만)
+/schema-history users           # users 테이블의 v1→v2→v3 변경 이력
+```
+
+- Bash에서 DDL 실행 시 **자동 감지/저장** (PostToolUse 훅)
+- `/schema-save`로 수동 저장도 가능
+- 세션 시작 시 컨텍스트에 주입하지 않음 (온디맨드 조회)
+
 ### 자동 동작 (Hooks) - 수동 저장 불필요
 
 모든 메모리 캡처가 자동으로 이루어집니다:
 
-- **PostToolUse** (Write/Edit/Bash): 파일 수정, 명령 실행을 `observations` 테이블에 자동 기록 (async)
+- **PostToolUse** (Write/Edit/Bash): 파일 수정, 명령 실행을 `observations` 테이블에 자동 기록 + DDL 감지 시 `schemas` 테이블에 영구 저장 (async)
 - **세션 종료 (Stop)**:
   1. `auto-summary.sh`가 세션 요약을 `sessions` 테이블에 자동 저장 + 오래된 데이터 정리
   2. agent 훅이 관찰 내용을 분석하여 중요한 것만 `memories` 테이블에 자동 INSERT (importance=3)
@@ -233,6 +252,9 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 | `/memory-list` | 메모리 목록/통계 |
 | `/memory-remove` | 메모리 삭제 |
 | `/memory-summary` | 세션 요약 저장 |
+| `/schema-save` | DDL 영구 저장 (버전 자동 관리) |
+| `/schema-list` | 프로젝트 스키마 현황 조회 |
+| `/schema-history` | 테이블별 DDL 변경 이력 |
 | `/duo-loop` | Gemini↔Claude 전체 루프 (분석→구현→검증→수정) |
 | `/duo-review` | 기존 코드에 교차 검증 루프 실행 |
 | `/duo-status` | 루프 진행 상태/히스토리 확인 |
@@ -253,7 +275,7 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 |--------|------|------|
 | `UserPromptSubmit` | command | `auto-gemini.sh` - `@gemini` 키워드 감지 시 자동 Gemini 호출 |
 | `PreToolUse:Bash` | prompt | 외부 확장 설치 시 보안 패턴 검증 |
-| `PostToolUse:Write\|Edit\|Bash` | command (async) | 도구 사용 기록을 observations에 자동 캡처 |
+| `PostToolUse:Write\|Edit\|Bash` | command (async) | 도구 사용 기록 자동 캡처 + DDL 감지 시 schemas에 영구 저장 |
 | `SessionStart` | command | `load-context.sh` - DB에서 직접 쿼리, zero-turn 컨텍스트 주입 |
 | `Stop` | command + agent | 세션 요약 저장 + 데이터 정리 + 조건부 메모리 자동 INSERT |
 
