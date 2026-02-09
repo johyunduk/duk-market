@@ -1,0 +1,461 @@
+{
+  "$schema": "https://claude-code-plugins.dev/marketplace-schema.json",
+  "name": "duk-market",
+  "version": "0.1.0",
+  "description": "Claude Code 올인원 플러그인 - 마켓플레이스 + Gemini CLI + 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 리뷰",
+  "author": {
+    "name": "johyunduk",
+    "github": "https://github.com/johyunduk"
+  },
+  "repository": "https://github.com/johyunduk/duk-market",
+  "license": "MIT",
+  "keywords": [
+    "marketplace",
+    "extensions",
+    "skills",
+    "agents",
+    "hooks",
+    "mcp",
+    "plugins",
+    "gemini",
+    "gemini-cli",
+    "ai-collaboration",
+    "memory",
+    "sqlite",
+    "schema",
+    "ddl",
+    "duo-loop",
+    "laravel",
+    "code-review"
+  ],
+  "categories": {
+    "marketplace": {
+      "label": "마켓플레이스",
+      "description": "확장 기능 검색, 설치, 관리"
+    },
+    "gemini": {
+      "label": "Gemini CLI 연동",
+      "description": "Gemini↔Claude 듀얼 AI 협업"
+    },
+    "memory": {
+      "label": "로컬 메모리",
+      "description": "SQLite 기반 지식 저장/검색"
+    },
+    "schema": {
+      "label": "스키마(DDL) 관리",
+      "description": "DDL 영구 저장 및 버전 이력"
+    },
+    "duo-loop": {
+      "label": "듀얼 AI 루프",
+      "description": "Gemini↔Claude 교차 검증 루프"
+    },
+    "laravel": {
+      "label": "Laravel 리뷰",
+      "description": "Laravel 전용 코드 리뷰"
+    }
+  },
+  "skills": [
+    {
+      "name": "market-browse",
+      "command": "/market-browse",
+      "description": "Claude Code 확장 마켓플레이스에서 카테고리별로 확장 기능을 탐색합니다",
+      "category": "marketplace",
+      "path": "./skills/browse/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "WebFetch", "WebSearch", "Grep", "Glob"],
+      "argumentHint": "[category]"
+    },
+    {
+      "name": "market-search",
+      "command": "/market-search",
+      "description": "Claude Code 확장 마켓플레이스에서 키워드로 확장 기능을 검색합니다",
+      "category": "marketplace",
+      "path": "./skills/search/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "WebFetch", "WebSearch", "Grep", "Glob"],
+      "argumentHint": "<keyword> [--category <type>]"
+    },
+    {
+      "name": "market-install",
+      "command": "/market-install",
+      "description": "GitHub 레포지토리에서 Claude Code 확장 기능을 설치합니다",
+      "category": "marketplace",
+      "path": "./skills/install/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob", "WebFetch"],
+      "argumentHint": "<repository> [--scope user|project|local]"
+    },
+    {
+      "name": "market-uninstall",
+      "command": "/market-uninstall",
+      "description": "설치된 Claude Code 확장 기능을 제거합니다",
+      "category": "marketplace",
+      "path": "./skills/uninstall/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob"],
+      "argumentHint": "<extension-name> [--scope user|project|local]"
+    },
+    {
+      "name": "market-info",
+      "command": "/market-info",
+      "description": "Claude Code 확장 기능의 상세 정보를 표시합니다",
+      "category": "marketplace",
+      "path": "./skills/info/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "WebFetch", "Grep", "Glob"],
+      "argumentHint": "<repository-or-name>"
+    },
+    {
+      "name": "market-list",
+      "command": "/market-list",
+      "description": "현재 설치된 모든 Claude Code 확장 기능을 목록으로 표시합니다",
+      "category": "marketplace",
+      "path": "./skills/list/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Grep", "Glob"],
+      "argumentHint": "[--scope user|project|local|all]"
+    },
+    {
+      "name": "market-publish",
+      "command": "/market-publish",
+      "description": "현재 프로젝트의 Claude Code 확장 기능을 마켓플레이스에 공유할 수 있도록 패키징합니다",
+      "category": "marketplace",
+      "path": "./skills/publish/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob"],
+      "argumentHint": "[--type skill|agent|hook|mcp|plugin]"
+    },
+    {
+      "name": "gemini-analyze",
+      "command": "/gemini-analyze",
+      "description": "코드베이스 분석을 Gemini에게 위임하고, 분석 결과를 바탕으로 Claude Code가 구현합니다",
+      "category": "gemini",
+      "path": "./skills/gemini-analyze/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Grep", "Glob", "Write", "Edit"],
+      "argumentHint": "<분석할 내용 또는 구현 요청>"
+    },
+    {
+      "name": "gemini-review",
+      "command": "/gemini-review",
+      "description": "Gemini에게 코드 리뷰를 요청하고, 피드백을 바탕으로 Claude Code가 코드를 개선합니다",
+      "category": "gemini",
+      "path": "./skills/gemini-review/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob"],
+      "argumentHint": "[파일경로 또는 git diff]"
+    },
+    {
+      "name": "gemini-research",
+      "command": "/gemini-research",
+      "description": "Gemini의 웹 검색과 대규모 컨텍스트 능력을 활용하여 기술 리서치를 수행하고, 결과를 Claude Code에 전달합니다",
+      "category": "gemini",
+      "path": "./skills/gemini-research/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Write", "Grep", "Glob"],
+      "argumentHint": "<리서치 주제>"
+    },
+    {
+      "name": "gemini-ask",
+      "command": "/gemini-ask",
+      "description": "Gemini에게 직접 질문하고 응답을 받습니다. 간단한 질문이나 second opinion이 필요할 때 사용합니다",
+      "category": "gemini",
+      "path": "./skills/gemini-ask/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Grep", "Glob"],
+      "argumentHint": "<질문>"
+    },
+    {
+      "name": "memory-save",
+      "command": "/memory-save",
+      "description": "세션에서 얻은 지식, 결정사항, 버그 수정, 패턴 등을 로컬 SQLite DB에 저장합니다",
+      "category": "memory",
+      "path": "./skills/memory-save/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Grep", "Glob"],
+      "argumentHint": "<카테고리> <내용>"
+    },
+    {
+      "name": "memory-recall",
+      "command": "/memory-recall",
+      "description": "SQLite DB에서 키워드나 카테고리로 저장된 지식을 검색합니다 (FTS5 전문 검색)",
+      "category": "memory",
+      "path": "./skills/memory-recall/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Grep", "Glob"],
+      "argumentHint": "<검색어> [--category <type>] [--limit <N>]"
+    },
+    {
+      "name": "memory-list",
+      "command": "/memory-list",
+      "description": "SQLite DB에 저장된 모든 메모리를 카테고리별 통계와 함께 표시합니다",
+      "category": "memory",
+      "path": "./skills/memory-list/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read"],
+      "argumentHint": "[--category <type>] [--stats]"
+    },
+    {
+      "name": "memory-remove",
+      "command": "/memory-remove",
+      "description": "SQLite DB에서 저장된 메모리를 삭제합니다",
+      "category": "memory",
+      "path": "./skills/memory-remove/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read"],
+      "argumentHint": "<ID 또는 검색어> [--category <type>] [--before <date>]"
+    },
+    {
+      "name": "memory-summary",
+      "command": "/memory-summary",
+      "description": "현재 세션에서 수행한 작업을 자동 요약하여 SQLite DB의 sessions 테이블에 저장합니다",
+      "category": "memory",
+      "path": "./skills/memory-summary/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Grep", "Glob"],
+      "argumentHint": ""
+    },
+    {
+      "name": "schema-save",
+      "command": "/schema-save",
+      "description": "DDL(CREATE TABLE 등)을 영구 저장합니다. 자동 감지 외에 수동으로 DDL을 저장할 때 사용합니다",
+      "category": "schema",
+      "path": "./skills/schema-save/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Grep", "Glob"],
+      "argumentHint": "<DDL문 또는 테이블명>"
+    },
+    {
+      "name": "schema-list",
+      "command": "/schema-list",
+      "description": "프로젝트의 현재 스키마(DDL) 목록을 조회합니다. 테이블별 최신 버전만 표시합니다",
+      "category": "schema",
+      "path": "./skills/schema-list/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read"],
+      "argumentHint": "[--project <name>] [--all]"
+    },
+    {
+      "name": "schema-history",
+      "command": "/schema-history",
+      "description": "특정 테이블의 DDL 변경 이력을 버전별로 조회합니다",
+      "category": "schema",
+      "path": "./skills/schema-history/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read"],
+      "argumentHint": "<테이블명> [--project <name>]"
+    },
+    {
+      "name": "duo-loop",
+      "command": "/duo-loop",
+      "description": "Gemini↔Claude 듀얼 AI 루프 - Gemini가 분석하고 Claude가 구현한 뒤, Gemini가 검증하고 Claude가 평가/수정하는 루프를 반복합니다",
+      "category": "duo-loop",
+      "path": "./skills/duo-loop/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob", "WebFetch"],
+      "argumentHint": "<구현할 작업 설명>"
+    },
+    {
+      "name": "duo-review",
+      "command": "/duo-review",
+      "description": "이미 구현된 코드에 대해 Gemini↔Claude 교차 검증 루프를 실행합니다",
+      "category": "duo-loop",
+      "path": "./skills/duo-review/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob"],
+      "argumentHint": "<파일경로 또는 설명> [--rounds <N>]"
+    },
+    {
+      "name": "duo-status",
+      "command": "/duo-status",
+      "description": "현재 진행 중이거나 완료된 Duo Loop의 상태를 확인합니다",
+      "category": "duo-loop",
+      "path": "./skills/duo-status/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Grep", "Glob"],
+      "argumentHint": "[--history]"
+    },
+    {
+      "name": "laravel-review",
+      "command": "/laravel-review",
+      "description": "Laravel 코드를 CLAUDE.md 컨벤션 + Laravel 모범 사례 기준으로 리뷰합니다",
+      "category": "laravel",
+      "path": "./skills/laravel-review/SKILL.md",
+      "userInvocable": true,
+      "allowedTools": ["Bash", "Read", "Grep", "Glob"],
+      "argumentHint": "<파일|디렉토리> [--focus <category>] [--fix]"
+    }
+  ],
+  "agents": [
+    {
+      "name": "marketplace",
+      "description": "Claude Code 확장 기능의 검색, 분석, 설치를 수행하는 마켓플레이스 에이전트. 복잡한 확장 설치나 여러 확장을 한번에 처리할 때 위임됩니다.",
+      "category": "marketplace",
+      "path": "./agents/marketplace.md",
+      "model": "sonnet",
+      "tools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob", "WebFetch", "WebSearch"]
+    },
+    {
+      "name": "market-security",
+      "description": "Claude Code 확장 기능의 보안을 검토하는 에이전트. 훅 스크립트, MCP 서버, 에이전트 권한 등을 분석하여 보안 위험을 평가합니다.",
+      "category": "marketplace",
+      "path": "./agents/security-reviewer.md",
+      "model": "sonnet",
+      "tools": ["Bash", "Read", "Grep", "Glob", "WebFetch"]
+    },
+    {
+      "name": "gemini-bridge",
+      "description": "Gemini CLI와의 상호작용을 관리하는 브릿지 에이전트. 복잡한 분석 요청을 Gemini에 위임하고, 응답을 파싱하여 Claude Code의 구현 작업으로 변환합니다.",
+      "category": "gemini",
+      "path": "./agents/gemini-bridge.md",
+      "model": "sonnet",
+      "tools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob"]
+    },
+    {
+      "name": "memory-manager",
+      "description": "로컬 SQLite DB의 메모리를 관리하는 에이전트. 정리, 중복 제거, 태그 재분류, CLAUDE.md 연동 등을 처리합니다.",
+      "category": "memory",
+      "path": "./agents/memory-manager.md",
+      "model": "sonnet",
+      "tools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob"]
+    },
+    {
+      "name": "duo-loop",
+      "description": "Gemini↔Claude 듀얼 AI 루프를 관리하는 에이전트. Gemini CLI로 분석/검증을 수행하고, Claude가 구현/평가/수정하는 반복 루프를 자율적으로 실행합니다.",
+      "category": "duo-loop",
+      "path": "./agents/duo-loop.md",
+      "model": "sonnet",
+      "tools": ["Bash", "Read", "Write", "Edit", "Grep", "Glob"]
+    }
+  ],
+  "hooks": [
+    {
+      "event": "UserPromptSubmit",
+      "description": "@gemini 키워드 감지 시 자동으로 Gemini CLI 호출",
+      "category": "gemini",
+      "type": "command",
+      "matcher": "",
+      "script": "./scripts/auto-gemini.sh",
+      "timeout": 30,
+      "async": false
+    },
+    {
+      "event": "PreToolUse",
+      "description": "외부 확장 설치 시 보안 패턴 검증 (위험 명령어 감지)",
+      "category": "marketplace",
+      "type": "prompt",
+      "matcher": "Bash",
+      "async": false
+    },
+    {
+      "event": "PostToolUse",
+      "description": "도구 사용 기록 자동 캡처 + DDL 감지 시 schemas 테이블에 영구 저장",
+      "category": "memory",
+      "type": "command",
+      "matcher": "Write|Edit|Bash",
+      "script": "./scripts/auto-observe.sh",
+      "timeout": 5,
+      "async": true
+    },
+    {
+      "event": "SessionStart",
+      "description": "DB에서 이전 세션 요약, 결정사항, 주의사항을 로드하여 zero-turn 컨텍스트 주입",
+      "category": "memory",
+      "type": "command",
+      "matcher": "",
+      "script": "./scripts/load-context.sh",
+      "timeout": 5,
+      "async": false
+    },
+    {
+      "event": "Stop",
+      "description": "세션 요약 저장 + 오래된 데이터 정리 + 조건부 메모리 자동 INSERT",
+      "category": "memory",
+      "type": "command+agent",
+      "matcher": "",
+      "scripts": [
+        "./scripts/auto-summary.sh"
+      ],
+      "timeout": 10,
+      "async": false
+    }
+  ],
+  "scripts": [
+    {
+      "name": "auto-gemini",
+      "path": "./scripts/auto-gemini.sh",
+      "description": "@gemini 키워드 감지 및 Gemini CLI 자동 호출"
+    },
+    {
+      "name": "auto-observe",
+      "path": "./scripts/auto-observe.sh",
+      "description": "도구 사용 기록 자동 캡처 (파일 수정, 명령 실행, DDL 감지)"
+    },
+    {
+      "name": "auto-summary",
+      "path": "./scripts/auto-summary.sh",
+      "description": "세션 종료 시 요약 저장 및 오래된 데이터 정리"
+    },
+    {
+      "name": "load-context",
+      "path": "./scripts/load-context.sh",
+      "description": "세션 시작 시 DB에서 컨텍스트 주입"
+    },
+    {
+      "name": "init-db",
+      "path": "./scripts/init-db.sh",
+      "description": "SQLite DB 초기화 (테이블 생성, FTS5 인덱스)"
+    }
+  ],
+  "requirements": {
+    "claudeCode": ">=1.0.0",
+    "optional": {
+      "gemini-cli": {
+        "package": "@google/gemini-cli",
+        "description": "Gemini 연동 기능 사용 시 필요",
+        "install": "npm install -g @google/gemini-cli"
+      },
+      "sqlite3": {
+        "description": "메모리/스키마 기능 사용 시 필요 (대부분 OS에 기본 포함)",
+        "install": "apt install sqlite3"
+      }
+    }
+  },
+  "database": {
+    "path": "~/.claude/duk-market.db",
+    "envOverride": "DUK_MARKET_DB",
+    "tables": [
+      {
+        "name": "memories",
+        "description": "지식 저장 (FTS5 인덱싱)",
+        "columns": ["id", "category", "title", "content", "tags", "author", "project", "session_id", "importance", "created_at", "updated_at"]
+      },
+      {
+        "name": "memories_fts",
+        "description": "FTS5 전문 검색 가상 테이블",
+        "type": "virtual",
+        "columns": ["title", "content", "tags", "category"]
+      },
+      {
+        "name": "schemas",
+        "description": "DDL 영구 저장 (버전 이력 관리)",
+        "columns": ["id", "table_name", "ddl", "version", "change_type", "project", "session_id", "note", "created_at"]
+      },
+      {
+        "name": "observations",
+        "description": "자동 캡처된 도구 사용 기록",
+        "columns": ["id", "tool_name", "tool_input", "tool_output", "project", "session_id", "created_at"]
+      },
+      {
+        "name": "sessions",
+        "description": "세션 요약",
+        "columns": ["id", "session_id", "project", "summary", "files_changed", "decisions", "learnings", "todos", "started_at", "ended_at"]
+      },
+      {
+        "name": "duo_loops",
+        "description": "듀얼 AI 루프 상태 추적",
+        "columns": ["id", "task", "status", "current_round", "max_rounds", "final_score", "rounds", "started_at", "ended_at"]
+      }
+    ]
+  }
+}
