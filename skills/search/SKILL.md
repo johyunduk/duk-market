@@ -24,7 +24,17 @@ argument-hint: "<keyword> [--category <type>]"
 
 ## 검색 전략
 
-### 1단계: GitHub 검색
+### 1단계: 로컬 마켓플레이스 카탈로그 검색
+
+먼저 `.claude-plugin/marketplace.json`에 등록된 큐레이션 목록에서 키워드와 일치하는 항목을 찾습니다:
+
+```bash
+cat .claude-plugin/marketplace.json
+```
+
+`plugins` 배열에서 `name`, `description`, `tags`, `category` 필드를 대상으로 키워드 매칭을 수행합니다.
+
+### 2단계: GitHub 검색
 
 ```bash
 # 기본 검색
@@ -37,12 +47,12 @@ gh search repos "claude-code $CATEGORY $KEYWORD" --sort stars --limit $LIMIT --j
 gh search code "SKILL.md $KEYWORD" --json repository,path
 ```
 
-### 2단계: 웹 검색 보완
+### 3단계: 웹 검색 보완
 
 GitHub 검색 결과가 부족하면 웹 검색으로 보완합니다:
 - `claude code $KEYWORD skill OR plugin OR hook OR agent site:github.com`
 
-### 3단계: 큐레이션 목록 확인
+### 4단계: 큐레이션 목록 확인
 
 awesome-claude-code 같은 큐레이션 목록에서 관련 항목을 확인합니다.
 
