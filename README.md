@@ -1,6 +1,6 @@
 # duk-market
 
-Claude Code 올인원 플러그인 - 확장 마켓플레이스 + Gemini CLI 연동 + 로컬 메모리(SQLite) + 듀얼 AI 루프.
+Claude Code 올인원 플러그인 - 확장 마켓플레이스 + Gemini CLI 연동 + 로컬 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 코드 리뷰.
 
 ## 설치
 
@@ -227,6 +227,39 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 점수: 6 → 8 → 9 📈
 수정: 5개 수용, 2개 거부
 ```
+
+---
+
+## 5. Laravel 코드 리뷰
+
+CLAUDE.md 코딩 컨벤션 + Laravel 모범 사례 기준으로 코드를 리뷰합니다. Gemini 불필요, Claude 단독 수행.
+
+### 리뷰 카테고리
+
+| 카테고리 | 검사 항목 |
+|----------|----------|
+| `structure` | 중첩 if → guard clause / early return, 긴 메서드 분리 |
+| `performance` | N+1, 루프 내 쿼리, `all()`, `firstWhere()` 반복, 컬렉션 다중 순회 |
+| `security` | SQL injection, mass assignment, XSS, 인증/인가 누락 |
+| `architecture` | fat controller, FormRequest 미분리, scope 미사용, route model binding |
+
+### 사용법
+
+```
+/laravel-review app/Http/Controllers/              # 컨트롤러 전체 리뷰
+/laravel-review app/Models/Order.php               # 특정 모델
+/laravel-review app/Services/ --focus performance   # 퍼포먼스만 집중
+/laravel-review app/Http/ --fix                     # 리뷰 + 자동 수정
+/laravel-review                                     # staged 파일 리뷰
+```
+
+### 심각도
+
+- `critical` - 반드시 수정 (SQL injection, N+1 대량 데이터)
+- `warning` - 수정 권장 (중첩 3단계, fat controller)
+- `suggestion` - 개선 제안 (keyBy 활용, FormRequest 분리)
+
+`--fix` 옵션 사용 시 `critical`/`warning` 이슈를 자동 수정합니다.
 
 ---
 

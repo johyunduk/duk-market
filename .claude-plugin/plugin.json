@@ -1,7 +1,7 @@
 {
   "name": "duk-market",
   "version": "0.1.0",
-  "description": "Claude Code 확장 마켓플레이스 + Gemini CLI 연동 - 확장 기능 관리와 AI 협업을 지원하는 플러그인",
+  "description": "Claude Code 올인원 플러그인 - 마켓플레이스 + Gemini CLI + 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 리뷰",
   "author": {
     "name": "johyunduk"
   },
@@ -17,7 +17,14 @@
     "plugins",
     "gemini",
     "gemini-cli",
-    "ai-collaboration"
+    "ai-collaboration",
+    "memory",
+    "sqlite",
+    "schema",
+    "ddl",
+    "duo-loop",
+    "laravel",
+    "code-review"
   ],
   "skills": "./skills/",
   "agents": "./agents/",
