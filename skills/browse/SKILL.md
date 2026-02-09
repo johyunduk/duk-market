@@ -29,7 +29,17 @@ argument-hint: "[category]"
 
 ## 검색 방법
 
-GitHub에서 Claude Code 확장 기능을 검색합니다:
+### 1단계: 로컬 마켓플레이스 카탈로그 확인
+
+먼저 `.claude-plugin/marketplace.json`에 등록된 큐레이션 목록을 확인합니다:
+
+```bash
+cat .claude-plugin/marketplace.json
+```
+
+### 2단계: GitHub 검색
+
+로컬 카탈로그에 없는 경우 GitHub에서 Claude Code 확장 기능을 검색합니다:
 
 ```bash
 # 카테고리별 검색 쿼리
