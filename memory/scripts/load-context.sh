@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-# duk-memory: Load previous session context on SessionStart (Docker)
+# duk-memory: Load previous session context on SessionStart
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-"$SCRIPT_DIR/docker-up.sh" 2>/dev/null || exit 0
+DB="$HOME/.claude/duk-market.db"
 
-DB="/data/duk-market.db"
+# DB가 없으면 초기화
+if [ ! -f "$DB" ]; then
+  bash "$(dirname "$0")/init-db.sh" 2>/dev/null || exit 0
+fi
+
 PROJECT=$(basename "$(pwd)")
 
-# --- Previous session summary (LIMIT 1) ---
-LAST_SESSION=$(docker exec duk-memory sqlite3 -separator '|' "$DB" \
+# --- 이전 세션 요약 ---
+LAST_SESSION=$(sqlite3 -separator '|' "$DB" \
   "SELECT summary, files_changed, tools_used, started_at, ended_at
    FROM sessions
    WHERE project = '$(echo "$PROJECT" | sed "s/'/''/g")'
@@ -27,8 +30,8 @@ if [ -n "$LAST_SESSION" ]; then
   echo ""
 fi
 
-# --- Key memories: decision (LIMIT 5) ---
-DECISIONS=$(docker exec duk-memory sqlite3 "$DB" \
+# --- 주요 결정사항 (최근 5개) ---
+DECISIONS=$(sqlite3 "$DB" \
   "SELECT '#' || id || ' ' || title || ': ' || substr(content,1,80)
    FROM memories
    WHERE project = '$(echo "$PROJECT" | sed "s/'/''/g")'
@@ -38,14 +41,12 @@ DECISIONS=$(docker exec duk-memory sqlite3 "$DB" \
 
 if [ -n "$DECISIONS" ]; then
   echo "[duk-memory] 주요 결정사항:"
-  echo "$DECISIONS" | while read -r line; do
-    echo "  $line"
-  done
+  echo "$DECISIONS" | while read -r line; do echo "  $line"; done
   echo ""
 fi
 
-# --- Key memories: pitfall (LIMIT 5) ---
-PITFALLS=$(docker exec duk-memory sqlite3 "$DB" \
+# --- 주의사항 (최근 5개) ---
+PITFALLS=$(sqlite3 "$DB" \
   "SELECT '#' || id || ' ' || title || ': ' || substr(content,1,80)
    FROM memories
    WHERE project = '$(echo "$PROJECT" | sed "s/'/''/g")'
@@ -55,14 +56,12 @@ PITFALLS=$(docker exec duk-memory sqlite3 "$DB" \
 
 if [ -n "$PITFALLS" ]; then
   echo "[duk-memory] 주의사항:"
-  echo "$PITFALLS" | while read -r line; do
-    echo "  $line"
-  done
+  echo "$PITFALLS" | while read -r line; do echo "  $line"; done
   echo ""
 fi
 
-# --- Key memories: recent bugfix (LIMIT 3) ---
-BUGFIXES=$(docker exec duk-memory sqlite3 "$DB" \
+# --- 최근 버그 수정 (7일) ---
+BUGFIXES=$(sqlite3 "$DB" \
   "SELECT '#' || id || ' ' || title || ': ' || substr(content,1,80)
    FROM memories
    WHERE project = '$(echo "$PROJECT" | sed "s/'/''/g")'
@@ -73,14 +72,12 @@ BUGFIXES=$(docker exec duk-memory sqlite3 "$DB" \
 
 if [ -n "$BUGFIXES" ]; then
   echo "[duk-memory] 최근 버그 수정 (7일):"
-  echo "$BUGFIXES" | while read -r line; do
-    echo "  $line"
-  done
+  echo "$BUGFIXES" | while read -r line; do echo "  $line"; done
   echo ""
 fi
 
-# --- Active Duo Loop check ---
-ACTIVE_LOOP=$(docker exec duk-memory sqlite3 "$DB" \
+# --- 진행 중인 Duo Loop ---
+ACTIVE_LOOP=$(sqlite3 "$DB" \
   "SELECT id, task, current_round, max_rounds
    FROM duo_loops
    WHERE status = 'in_progress'

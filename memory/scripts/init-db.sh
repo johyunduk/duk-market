@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
-# duk-memory SQLite database initialization (Docker)
+# duk-memory: SQLite DB 초기화 (로컬)
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-"$SCRIPT_DIR/docker-up.sh"
+DB="$HOME/.claude/duk-market.db"
 
-DB="/data/duk-market.db"
-
-docker exec -i duk-memory sqlite3 "$DB" <<'SQL'
+sqlite3 "$DB" <<'SQL'
 CREATE TABLE IF NOT EXISTS memories (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   category TEXT NOT NULL DEFAULT 'til',
@@ -48,14 +45,12 @@ CREATE TABLE IF NOT EXISTS duo_loops (
   ended_at DATETIME
 );
 
--- FTS5 full-text search index on memories
 CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts USING fts5(
   title, content, tags, category,
   content='memories',
   content_rowid='id'
 );
 
--- Triggers to keep FTS index in sync
 CREATE TRIGGER IF NOT EXISTS memories_ai AFTER INSERT ON memories BEGIN
   INSERT INTO memories_fts(rowid, title, content, tags, category)
   VALUES (new.id, new.title, new.content, new.tags, new.category);
@@ -73,7 +68,6 @@ CREATE TRIGGER IF NOT EXISTS memories_au AFTER UPDATE ON memories BEGIN
   VALUES (new.id, new.title, new.content, new.tags, new.category);
 END;
 
--- Observations: auto-captured tool use events
 CREATE TABLE IF NOT EXISTS observations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tool_name TEXT,
@@ -87,7 +81,6 @@ CREATE TABLE IF NOT EXISTS observations (
 CREATE INDEX IF NOT EXISTS idx_observations_session ON observations(session_id);
 CREATE INDEX IF NOT EXISTS idx_observations_project ON observations(project);
 
--- Schemas: DDL permanent storage with version tracking
 CREATE TABLE IF NOT EXISTS schemas (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   table_name TEXT NOT NULL,
@@ -102,12 +95,10 @@ CREATE TABLE IF NOT EXISTS schemas (
 
 CREATE INDEX IF NOT EXISTS idx_schemas_table ON schemas(table_name);
 CREATE INDEX IF NOT EXISTS idx_schemas_project ON schemas(project);
-
--- Index for common queries
 CREATE INDEX IF NOT EXISTS idx_memories_category ON memories(category);
 CREATE INDEX IF NOT EXISTS idx_memories_project ON memories(project);
 CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_project ON sessions(project);
 SQL
 
-echo "duk-memory DB initialized: docker://duk-memory$DB"
+echo "duk-memory DB initialized: $DB"

@@ -5,7 +5,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "~/.claude/plugins/cache/duk-market/duk-gemini-duo/0.1.0/gemini-duo/scripts/auto-gemini.sh",
+          "command": "${CLAUDE_PLUGIN_ROOT}/scripts/auto-gemini.sh",
           "timeout": 30
         }
       ]
