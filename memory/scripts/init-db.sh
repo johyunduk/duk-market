@@ -8,13 +8,6 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 DB="/data/duk-market.db"
 
-# Mark as initialized to avoid re-running on every session
-INIT_FLAG="$HOME/.claude/duk-market-data/.initialized"
-if [ -f "$INIT_FLAG" ]; then
-  exit 0
-fi
-mkdir -p "$(dirname "$INIT_FLAG")"
-
 docker exec -i duk-memory sqlite3 "$DB" <<'SQL'
 CREATE TABLE IF NOT EXISTS memories (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -117,5 +110,4 @@ CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_project ON sessions(project);
 SQL
 
-touch "$INIT_FLAG"
 echo "duk-memory DB initialized: docker://duk-memory$DB"
