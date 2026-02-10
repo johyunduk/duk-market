@@ -5,7 +5,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "~/.claude/plugins/cache/duk-market/duk-gemini-duo/0.1.0/gemini-duo/scripts/auto-gemini.sh",
+          "command": "~/.claude/duk-market/hook-dispatch.sh duk-gemini-duo@duk-market gemini-duo/scripts/auto-gemini.sh",
           "timeout": 30
         }
       ]
@@ -17,7 +17,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "~/.claude/plugins/cache/duk-market/duk-memory/0.1.0/memory/scripts/auto-observe.sh",
+          "command": "~/.claude/duk-market/hook-dispatch.sh duk-memory@duk-market memory/scripts/auto-observe.sh",
           "timeout": 5,
           "async": true
         }
@@ -30,7 +30,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "~/.claude/plugins/cache/duk-market/duk-memory/0.1.0/memory/scripts/load-context.sh",
+          "command": "~/.claude/duk-market/hook-dispatch.sh duk-memory@duk-market memory/scripts/load-context.sh",
           "timeout": 5
         }
       ]
@@ -42,7 +42,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "~/.claude/plugins/cache/duk-market/duk-memory/0.1.0/memory/scripts/auto-summary.sh",
+          "command": "~/.claude/duk-market/hook-dispatch.sh duk-memory@duk-market memory/scripts/auto-summary.sh",
           "timeout": 10
         },
         {
