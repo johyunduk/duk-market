@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "duk-market",
+      "name": "duk-all",
       "source": "./",
       "description": "Gemini CLI 듀얼 AI + 세션 메모리 + Laravel 코드 리뷰",
       "version": "0.2.0",
