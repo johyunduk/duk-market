@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# duk-market memory SQLite database initialization
-# DB location: ~/.claude/duk-market.db
+# duk-memory SQLite database initialization (Docker)
 
 set -e
 
-DB_PATH="${DUK_MARKET_DB:-$HOME/.claude/duk-market.db}"
-mkdir -p "$(dirname "$DB_PATH")"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+"$SCRIPT_DIR/docker-up.sh"
 
-sqlite3 "$DB_PATH" <<'SQL'
+DB="/data/duk-market.db"
+
+docker exec -i duk-memory sqlite3 "$DB" <<'SQL'
 CREATE TABLE IF NOT EXISTS memories (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   category TEXT NOT NULL DEFAULT 'til',
@@ -109,4 +110,4 @@ CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_project ON sessions(project);
 SQL
 
-echo "duk-market DB initialized: $DB_PATH"
+echo "duk-memory DB initialized: docker://duk-memory$DB"

@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 플러그인 | 디렉토리 | 언어/DB |
 |---------|---------|--------|
 | duk-gemini-duo | `gemini-duo/` | Bash, Markdown |
-| duk-memory | `memory/` | Bash, SQLite (`~/.claude/duk-market.db`) |
+| duk-memory | `memory/` | Bash, Docker (alpine+sqlite3), 데이터 볼륨 `~/.claude/duk-market-data/` |
 | duk-laravel | `laravel/` | Markdown |
 
 ---
@@ -23,6 +23,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 /plugin marketplace add https://github.com/johyunduk/duk-market/memory
 /plugin marketplace add https://github.com/johyunduk/duk-market/laravel
 ```
+
+duk-memory는 Docker 컨테이너(`duk-memory`)로 SQLite를 실행합니다. 플러그인 설치 후 `memory/` 디렉토리에서 `docker compose up -d` 및 `bash scripts/init-db.sh`로 초기화하세요. 이후 각 스크립트가 `docker-up.sh`를 호출해 컨테이너를 자동 관리합니다.
 
 Gemini/Duo 기능 사용 전 Gemini CLI 설치 필요:
 

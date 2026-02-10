@@ -1,0 +1,9 @@
+services:
+  duk-memory:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: duk-memory
+    volumes:
+      - ${HOME}/.claude/duk-market-data:/data
+    restart: unless-stopped

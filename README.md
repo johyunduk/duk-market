@@ -72,12 +72,19 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 
 세션에서 얻은 지식을 로컬 SQLite DB(`~/.claude/duk-market.db`)에 저장합니다.
 
-### 초기 설정
+### 사전 준비
+
+Docker가 설치되어 있어야 합니다. 플러그인 설치 후 컨테이너를 기동하세요.
 
 ```bash
-# DB 자동 초기화 (첫 사용 시 자동 실행됨)
-# 또는 수동: bash scripts/init-db.sh
+# memory/ 디렉토리에서
+docker compose up -d
+
+# DB 초기화 (첫 사용 시)
+bash scripts/init-db.sh
 ```
+
+이후 세션 시작/종료 시 컨테이너가 자동으로 확인되고 없으면 기동됩니다. 데이터는 `~/.claude/duk-market-data/`에 영구 저장됩니다.
 
 ### 메모리 저장
 
