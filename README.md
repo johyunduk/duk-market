@@ -1,6 +1,5 @@
 # duk-market
 
-
 Claude Code 플러그인 모음 - 필요한 것만 골라서 설치하세요.
 
 ## 설치 방법
@@ -89,11 +88,17 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 
 ## 2. duk-memory
 
-세션에서 얻은 지식을 Docker 컨테이너(`duk-memory`) 내 SQLite DB에 저장합니다. 데이터는 `~/.claude/duk-market-data/`에 영구 보관됩니다.
+세션에서 얻은 지식을 로컬 SQLite DB에 저장합니다. 데이터는 `~/.claude/duk-market.db`에 영구 보관됩니다.
 
 ### 사전 준비
 
-별도 설치 없음. 플러그인 설치 후 바로 사용 가능합니다. DB는 `~/.claude/duk-market.db`에 자동 생성됩니다.
+플러그인 설치 후 **최초 1회** 훅 등록이 필요합니다.
+
+```bash
+~/.claude/plugins/cache/duk-market/duk-memory/0.1.0/scripts/setup.sh
+```
+
+> 이 스크립트가 `~/.claude/settings.json`에 PostToolUse/SessionStart 훅을 자동 등록합니다.
 
 ### 메모리 저장
 
@@ -184,3 +189,4 @@ CLAUDE.md 코딩 컨벤션 + Laravel 모범 사례 기준으로 코드를 리뷰
 ## 라이선스
 
 MIT
+
