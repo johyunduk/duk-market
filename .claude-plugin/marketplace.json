@@ -1,42 +1,31 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "duk-market",
+  "description": "Claude Code 플러그인 모음 - Gemini CLI + 메모리 + Laravel 리뷰",
   "owner": {
     "name": "johyunduk"
-  },
-  "metadata": {
-    "description": "Claude Code 플러그인 모음 - Gemini CLI + 메모리 + Laravel 리뷰",
-    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "duk-gemini-duo",
-      "source": "./gemini-duo",
       "description": "Gemini CLI 연동 + 듀얼 AI 루프",
-      "version": "0.1.0",
       "author": { "name": "johyunduk" },
-      "category": "productivity",
-      "tags": ["gemini", "gemini-cli", "ai-collaboration"],
-      "license": "MIT"
+      "source": "./gemini-duo",
+      "category": "productivity"
     },
     {
       "name": "duk-memory",
-      "source": "./memory",
       "description": "세션 메모리 + 스키마 관리 - SQLite 기반",
-      "version": "0.1.0",
       "author": { "name": "johyunduk" },
-      "category": "productivity",
-      "tags": ["memory", "sqlite", "schema"],
-      "license": "MIT"
+      "source": "./memory",
+      "category": "productivity"
     },
     {
       "name": "duk-laravel",
-      "source": "./laravel",
       "description": "Laravel 코드 리뷰 - 구조/퍼포먼스/보안/아키텍처",
-      "version": "0.1.0",
       "author": { "name": "johyunduk" },
-      "category": "code-review",
-      "tags": ["laravel", "php", "code-review"],
-      "license": "MIT"
+      "source": "./laravel",
+      "category": "code-review"
     }
   ]
 }

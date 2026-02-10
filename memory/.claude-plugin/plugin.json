@@ -1,17 +1,8 @@
 {
   "name": "duk-memory",
-  "version": "0.1.0",
-  "description": "로컬 메모리 + 스키마(DDL) 관리 - SQLite 기반 지식 영속화",
+  "description": "세션 메모리 + 스키마 관리 - SQLite 기반 지식 영속화",
   "author": {
     "name": "johyunduk"
   },
-  "repository": "https://github.com/johyunduk/duk-market",
-  "license": "MIT",
-  "keywords": [
-    "memory",
-    "sqlite",
-    "schema",
-    "ddl",
-    "knowledge"
-  ]
+  "repository": "https://github.com/johyunduk/duk-market"
 }
