@@ -39,4 +39,4 @@ if [ ! -f "$SCRIPT" ]; then
 fi
 
 # stdin을 그대로 전달하여 실행
-exec bash "$SCRIPT"
+/bin/bash "$SCRIPT"
