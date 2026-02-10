@@ -1,20 +1,13 @@
 {
   "name": "duk-market",
   "version": "0.1.0",
-  "description": "Claude Code 올인원 플러그인 - 마켓플레이스 + Gemini CLI + 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 리뷰",
+  "description": "Claude Code 올인원 플러그인 - Gemini CLI + 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 리뷰",
   "author": {
     "name": "johyunduk"
   },
   "repository": "https://github.com/johyunduk/duk-market",
   "license": "MIT",
   "keywords": [
-    "marketplace",
-    "extensions",
-    "skills",
-    "agents",
-    "hooks",
-    "mcp",
-    "plugins",
     "gemini",
     "gemini-cli",
     "ai-collaboration",

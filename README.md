@@ -1,6 +1,6 @@
 # duk-market
 
-Claude Code 올인원 플러그인 - 확장 마켓플레이스 + Gemini CLI 연동 + 로컬 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 코드 리뷰.
+Claude Code 올인원 플러그인 - Gemini CLI 연동 + 로컬 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 코드 리뷰.
 
 ## 설치
 
@@ -10,29 +10,7 @@ Claude Code 올인원 플러그인 - 확장 마켓플레이스 + Gemini CLI 연�
 
 ---
 
-## 1. 마켓플레이스
-
-Claude Code 확장 기능(Skills, Agents, Hooks, MCP Servers, Plugins)을 검색하고 설치합니다.
-
-```
-/market-browse              # 카테고리별 탐색
-/market-browse skills       # 스킬만 탐색
-
-/market-search git hooks               # 키워드 검색
-/market-search linter -c skills        # 카테고리 필터
-
-/market-install owner/repo                   # GitHub에서 설치
-/market-install owner/repo --scope project   # 프로젝트 범위로 설치
-
-/market-info owner/repo     # 상세 정보
-/market-list                # 설치된 확장 목록
-/market-uninstall name      # 제거
-/market-publish             # 내 확장을 패키징/공유
-```
-
----
-
-## 2. Gemini CLI 연동
+## 1. Gemini CLI 연동
 
 분석은 Gemini, 구현은 Claude Code - 두 AI의 장점을 결합합니다.
 
@@ -68,7 +46,7 @@ gemini auth login  # 또는 export GEMINI_API_KEY="your-key"
 
 ---
 
-## 3. 로컬 메모리 시스템
+## 2. 로컬 메모리 시스템
 
 세션에서 얻은 지식을 로컬 SQLite DB(`~/.claude/duk-market.db`)에 저장합니다.
 claude-mem에서 영감을 받은 FTS5 전문 검색 기반 메모리 시스템입니다.
@@ -173,7 +151,7 @@ claude-mem에서 영감을 받은 FTS5 전문 검색 기반 메모리 시스템�
 
 ---
 
-## 4. Duo Loop - 듀얼 AI 교차 검증 루프
+## 3. Duo Loop - 듀얼 AI 교차 검증 루프
 
 Ralph Wiggum의 자기 참조 루프에서 영감을 받아, **Gemini와 Claude가 서로를 검증**하는 반복 루프입니다.
 
@@ -230,7 +208,7 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 
 ---
 
-## 5. Laravel 코드 리뷰
+## 4. Laravel 코드 리뷰
 
 CLAUDE.md 코딩 컨벤션 + Laravel 모범 사례 기준으로 코드를 리뷰합니다. Gemini 불필요, Claude 단독 수행.
 
@@ -269,13 +247,6 @@ CLAUDE.md 코딩 컨벤션 + Laravel 모범 사례 기준으로 코드를 리뷰
 
 | 커맨드 | 설명 |
 |--------|------|
-| `/market-browse` | 카테고리별 확장 기능 탐색 |
-| `/market-search` | 키워드로 확장 기능 검색 |
-| `/market-install` | 확장 기능 설치 |
-| `/market-uninstall` | 확장 기능 제거 |
-| `/market-info` | 확장 기능 상세 정보 |
-| `/market-list` | 설치된 확장 목록 |
-| `/market-publish` | 확장 기능 배포/패키징 |
 | `/gemini-analyze` | Gemini 분석 → Claude 구현 |
 | `/gemini-review` | Gemini 리뷰 → Claude 수정 |
 | `/gemini-research` | Gemini 리서치 → Claude 적용 |
@@ -297,8 +268,6 @@ CLAUDE.md 코딩 컨벤션 + Laravel 모범 사례 기준으로 코드를 리뷰
 
 | 에이전트 | 설명 |
 |---------|------|
-| `marketplace` | 확장 탐색/설치 범용 에이전트 |
-| `market-security` | 확장 보안 검토 에이전트 |
 | `gemini-bridge` | Gemini CLI 연동 브릿지 에이전트 |
 | `memory-manager` | SQLite 메모리 정리/품질 관리/CLAUDE.md 연동 에이전트 |
 | `duo-loop` | Gemini↔Claude 교차 검증 루프 관리 에이전트 |

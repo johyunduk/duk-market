@@ -47,7 +47,7 @@ duk-market/
 │   ├── plugin.json          # 플러그인 메타데이터 (진입점: skills/, agents/, hooks/)
 │   └── marketplace.json     # 큐레이션된 확장 카탈로그
 ├── skills/                  # 23개 슬래시 커맨드 정의 (각 디렉토리당 SKILL.md)
-├── agents/                  # 5개 전문 서브에이전트 (marketplace, gemini-bridge, memory-manager, duo-loop, security-reviewer)
+├── agents/                  # 3개 전문 서브에이전트 (gemini-bridge, memory-manager, duo-loop)
 ├── hooks/
 │   └── hooks.json           # 이벤트 기반 자동화 트리거
 └── scripts/                 # 훅에서 호출되는 Bash 자동화
@@ -65,7 +65,6 @@ duk-market/
 | 이벤트 | 스크립트/핸들러 | 동작 |
 |--------|----------------|------|
 | `UserPromptSubmit` | `auto-gemini.sh` | `@gemini` 키워드 감지 → Gemini 호출 → Claude 컨텍스트 주입 |
-| `PreToolUse:Bash` | prompt 훅 | 외부 확장 설치 명령 보안 패턴 검증 |
 | `PostToolUse:Write\|Edit\|Bash` | `auto-observe.sh` (async) | observations 테이블 기록 + DDL 감지 시 schemas 테이블 영구 저장 |
 | `SessionStart` | `load-context.sh` | DB 쿼리로 이전 세션 요약/결정사항/버그/중단된 Duo Loop 주입 |
 | `Stop` | `auto-summary.sh` + memory agent | 세션 요약 → sessions 테이블 + 중요 관찰 → memories 테이블 (importance=3) |
