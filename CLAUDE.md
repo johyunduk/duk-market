@@ -18,13 +18,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 설치 커맨드
 
+마켓플레이스 등록 (최초 1회):
 ```
-/plugin marketplace add https://github.com/johyunduk/duk-market/gemini-duo
-/plugin marketplace add https://github.com/johyunduk/duk-market/memory
-/plugin marketplace add https://github.com/johyunduk/duk-market/laravel
+/plugin marketplace add https://github.com/johyunduk/duk-market
 ```
 
-duk-memory는 Docker 컨테이너(`duk-memory`)로 SQLite를 실행합니다. 플러그인 설치 후 `memory/` 디렉토리에서 `docker compose up -d` 및 `bash scripts/init-db.sh`로 초기화하세요. 이후 각 스크립트가 `docker-up.sh`를 호출해 컨테이너를 자동 관리합니다.
+플러그인 설치:
+```
+/plugin install duk-gemini-duo
+/plugin install duk-memory
+/plugin install duk-laravel
+```
+
+duk-memory는 Docker 컨테이너(`duk-memory`)로 SQLite를 실행합니다. **플러그인 설치 후 최초 1회** 아래 명령으로 초기화하세요.
+
+```bash
+bash ~/.claude/plugins/cache/duk-market/duk-memory/0.1.0/memory/scripts/setup.sh
+```
+
+이후 훅 실행 시 `docker-up.sh`가 컨테이너를 자동으로 재기동합니다.
 
 Gemini/Duo 기능 사용 전 Gemini CLI 설치 필요:
 
@@ -54,22 +66,30 @@ duk-market/
 │   │                        # schema-save, schema-list, schema-history
 │   ├── agents/              # memory-manager
 │   ├── hooks/hooks.json     # PostToolUse / SessionStart / Stop
-│   └── scripts/             # init-db.sh, auto-observe.sh, auto-summary.sh, load-context.sh
+│   └── scripts/             # setup.sh (최초 1회), docker-up.sh, init-db.sh
+│                            # auto-observe.sh, auto-summary.sh, load-context.sh
 └── laravel/
     ├── .claude-plugin/plugin.json
     └── skills/              # laravel-review
 ```
 
-### 데이터 흐름 (duk-memory)
+### 데이터 흐름
+
+**duk-gemini-duo**
 
 | 이벤트 | 스크립트 | 동작 |
 |--------|---------|------|
 | `UserPromptSubmit` | `auto-gemini.sh` | `@gemini` 키워드 감지 → Gemini 호출 → Claude 컨텍스트 주입 |
+
+**duk-memory**
+
+| 이벤트 | 스크립트 | 동작 |
+|--------|---------|------|
 | `PostToolUse:Write\|Edit\|Bash` | `auto-observe.sh` (async) | observations 테이블 기록 + DDL 감지 시 schemas 테이블 영구 저장 |
 | `SessionStart` | `load-context.sh` | DB 쿼리로 이전 세션 요약/결정사항/버그/중단된 Duo Loop 주입 |
 | `Stop` | `auto-summary.sh` + memory agent | 세션 요약 → sessions 테이블 + 중요 관찰 → memories 테이블 (importance=3) |
 
-### SQLite DB 스키마 (`~/.claude/duk-market.db`)
+### SQLite DB 스키마 (Docker 볼륨 `~/.claude/duk-market-data/duk-market.db`)
 
 | 테이블 | 목적 | 만료 정책 |
 |--------|------|----------|

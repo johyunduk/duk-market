@@ -2,13 +2,31 @@
 
 Claude Code 플러그인 모음 - 필요한 것만 골라서 설치하세요.
 
+## 설치 방법
+
+**1단계 — 마켓플레이스 등록 (최초 1회)**
+
+```
+/plugin marketplace add https://github.com/johyunduk/duk-market
+```
+
+**2단계 — 플러그인 설치 (필요한 것만)**
+
+```
+/plugin install duk-gemini-duo
+/plugin install duk-memory
+/plugin install duk-laravel
+```
+
+---
+
 ## 플러그인 목록
 
-| 플러그인 | 설명 | 설치 |
-|---------|------|------|
-| [duk-gemini-duo](#1-duk-gemini-duo) | Gemini CLI 연동 + 듀얼 AI 루프 | `/plugin marketplace add https://github.com/johyunduk/duk-market/gemini-duo` |
-| [duk-memory](#2-duk-memory) | 로컬 메모리 + 스키마(DDL) 관리 | `/plugin marketplace add https://github.com/johyunduk/duk-market/memory` |
-| [duk-laravel](#3-duk-laravel) | Laravel 코드 리뷰 | `/plugin marketplace add https://github.com/johyunduk/duk-market/laravel` |
+| 플러그인 | 설명 |
+|---------|------|
+| [duk-gemini-duo](#1-duk-gemini-duo) | Gemini CLI 연동 + 듀얼 AI 루프 |
+| [duk-memory](#2-duk-memory) | 로컬 메모리 + 스키마(DDL) 관리 |
+| [duk-laravel](#3-duk-laravel) | Laravel 코드 리뷰 |
 
 ---
 
@@ -70,17 +88,17 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 
 ## 2. duk-memory
 
-세션에서 얻은 지식을 로컬 SQLite DB(`~/.claude/duk-market.db`)에 저장합니다.
+세션에서 얻은 지식을 Docker 컨테이너(`duk-memory`) 내 SQLite DB에 저장합니다. 데이터는 `~/.claude/duk-market-data/`에 영구 보관됩니다.
 
 ### 사전 준비
 
 Docker가 설치되어 있어야 합니다. **플러그인 설치 후 최초 1회** 아래 명령을 실행하세요.
 
 ```bash
-bash ~/.claude/plugins/duk-memory/scripts/setup.sh
+bash ~/.claude/plugins/cache/duk-market/duk-memory/0.1.0/memory/scripts/setup.sh
 ```
 
-이미지 빌드 + 컨테이너 기동 + DB 초기화가 한 번에 처리됩니다. 이후 세션에서는 컨테이너가 중지 상태면 자동으로 재기동됩니다. 데이터는 `~/.claude/duk-market-data/`에 영구 저장됩니다.
+이미지 빌드 + 컨테이너 기동 + DB 초기화가 한 번에 처리됩니다. 이후 세션에서는 컨테이너가 중지 상태면 자동으로 재기동됩니다.
 
 ### 메모리 저장
 
