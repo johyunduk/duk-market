@@ -13,7 +13,5 @@
     "schema",
     "ddl",
     "knowledge"
-  ],
-  "skills": "./skills/",
-  "hooks": "./hooks/hooks.json"
+  ]
 }
