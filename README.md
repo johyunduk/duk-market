@@ -4,8 +4,8 @@ Claude Code 올인원 플러그인 - 확장 마켓플레이스 + Gemini CLI 연�
 
 ## 설치
 
-```bash
-claude plugin add johyunduk/duk-market
+```
+/plugin marketplace add https://github.com/johyunduk/duk-market
 ```
 
 ---
