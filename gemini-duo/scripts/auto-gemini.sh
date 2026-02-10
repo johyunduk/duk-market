@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # duk-market: @gemini keyword trigger
 # Detects @gemini in user prompts and auto-calls Gemini CLI
+# Updated: 2026-02-10
 # Triggered by UserPromptSubmit hook
 # Output is injected into Claude's context as user feedback
 

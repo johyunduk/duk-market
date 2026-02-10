@@ -1,0 +1,11 @@
+{
+  "name": "duk-market",
+  "version": "0.2.0",
+  "description": "Claude Code 플러그인 모음 - Gemini CLI + 메모리 + Laravel 리뷰",
+  "author": {
+    "name": "johyunduk"
+  },
+  "repository": "https://github.com/johyunduk/duk-market",
+  "license": "MIT",
+  "hooks": "./hooks.json"
+}
