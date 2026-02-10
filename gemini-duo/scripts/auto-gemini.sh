@@ -49,6 +49,9 @@ if ! command -v gemini &>/dev/null; then
   exit 0
 fi
 
+# Notify user that Gemini is being called (visible in terminal via /dev/tty)
+printf '\n💎 \033[36m[Gemini]\033[0m 호출 중...\n' > /dev/tty 2>/dev/null || true
+
 # Call Gemini CLI
 # NODE_NO_WARNINGS suppresses node deprecation warnings
 # grep filters remaining gemini CLI informational noise
@@ -70,6 +73,7 @@ for line in sys.stdin:
 " 2>/dev/null || printf '%s\n' "$GEMINI_RAW")
 
 if [ $EXIT_CODE -ne 0 ] || [ -z "$(echo "$GEMINI_RESPONSE" | tr -d '[:space:]')" ]; then
+  printf '💎 \033[31m[Gemini]\033[0m 호출 실패\n' > /dev/tty 2>/dev/null || true
   echo ""
   echo "[duk-market] @gemini 자동 호출 실패"
   ERRMSG=$(NODE_NO_WARNINGS=1 gemini -p "$QUESTION" 2>&1 || true)
@@ -83,6 +87,9 @@ if [ $EXIT_CODE -ne 0 ] || [ -z "$(echo "$GEMINI_RESPONSE" | tr -d '[:space:]')"
   esac
   exit 0
 fi
+
+# Notify user that Gemini responded (visible in terminal via /dev/tty)
+printf '💎 \033[36m[Gemini]\033[0m 응답 완료 — Claude가 참고합니다\n' > /dev/tty 2>/dev/null || true
 
 # Output Gemini's response (injected into Claude's context)
 echo ""
