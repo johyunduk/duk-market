@@ -1,7 +1,7 @@
 # duk-market
 
-Claude Code 플러그인 모음 - 필요한 것만 골라서 설치하세요.
 
+Claude Code 플러그인 모음 - 필요한 것만 골라서 설치하세요.
 
 ## 설치 방법
 
