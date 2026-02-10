@@ -10,7 +10,10 @@
   "plugins": [
     {
       "name": "duk-market",
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "johyunduk/duk-market"
+      },
       "description": "올인원 플러그인 - 마켓플레이스 + Gemini CLI + 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 리뷰",
       "version": "0.1.0",
       "author": {
