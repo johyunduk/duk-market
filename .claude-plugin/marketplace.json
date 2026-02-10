@@ -9,13 +9,33 @@
   },
   "plugins": [
     {
-      "name": "duk-all",
-      "source": "./",
-      "description": "Gemini CLI 듀얼 AI + 세션 메모리 + Laravel 코드 리뷰",
-      "version": "0.2.0",
+      "name": "duk-gemini-duo",
+      "source": "./gemini-duo",
+      "description": "Gemini CLI 연동 + 듀얼 AI 루프",
+      "version": "0.1.0",
       "author": { "name": "johyunduk" },
       "category": "productivity",
-      "tags": ["gemini", "memory", "sqlite", "laravel", "hooks"],
+      "tags": ["gemini", "gemini-cli", "ai-collaboration"],
+      "license": "MIT"
+    },
+    {
+      "name": "duk-memory",
+      "source": "./memory",
+      "description": "세션 메모리 + 스키마 관리 - SQLite 기반",
+      "version": "0.1.0",
+      "author": { "name": "johyunduk" },
+      "category": "productivity",
+      "tags": ["memory", "sqlite", "schema"],
+      "license": "MIT"
+    },
+    {
+      "name": "duk-laravel",
+      "source": "./laravel",
+      "description": "Laravel 코드 리뷰 - 구조/퍼포먼스/보안/아키텍처",
+      "version": "0.1.0",
+      "author": { "name": "johyunduk" },
+      "category": "code-review",
+      "tags": ["laravel", "php", "code-review"],
       "license": "MIT"
     }
   ]
