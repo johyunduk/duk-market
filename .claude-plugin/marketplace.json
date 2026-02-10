@@ -1,0 +1,54 @@
+{
+  "name": "duk-market",
+  "owner": {
+    "name": "johyunduk"
+  },
+  "metadata": {
+    "description": "Claude Code 플러그인 모음 - Gemini CLI + 듀얼 AI 루프 + 메모리 + Laravel 리뷰",
+    "version": "0.2.0"
+  },
+  "plugins": [
+    {
+      "name": "duk-gemini-duo",
+      "source": {
+        "source": "github",
+        "repo": "johyunduk/duk-market",
+        "path": "gemini-duo"
+      },
+      "description": "Gemini CLI 연동 + 듀얼 AI 루프 - 분석은 Gemini, 구현은 Claude",
+      "version": "0.1.0",
+      "author": { "name": "johyunduk" },
+      "category": "productivity",
+      "tags": ["gemini", "gemini-cli", "ai-collaboration", "duo-loop"],
+      "license": "MIT"
+    },
+    {
+      "name": "duk-memory",
+      "source": {
+        "source": "github",
+        "repo": "johyunduk/duk-market",
+        "path": "memory"
+      },
+      "description": "로컬 메모리 + 스키마(DDL) 관리 - Docker 기반 SQLite 지식 영속화",
+      "version": "0.1.0",
+      "author": { "name": "johyunduk" },
+      "category": "productivity",
+      "tags": ["memory", "sqlite", "docker", "schema", "ddl"],
+      "license": "MIT"
+    },
+    {
+      "name": "duk-laravel",
+      "source": {
+        "source": "github",
+        "repo": "johyunduk/duk-market",
+        "path": "laravel"
+      },
+      "description": "Laravel 코드 리뷰 - 구조/퍼포먼스/보안/아키텍처 자동 분석",
+      "version": "0.1.0",
+      "author": { "name": "johyunduk" },
+      "category": "code-review",
+      "tags": ["laravel", "php", "code-review", "eloquent"],
+      "license": "MIT"
+    }
+  ]
+}
