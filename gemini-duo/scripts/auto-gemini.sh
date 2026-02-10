@@ -50,25 +50,39 @@ if ! command -v gemini &>/dev/null; then
 fi
 
 # Call Gemini CLI
-GEMINI_RESPONSE=$(gemini -p "$QUESTION" 2>&1) || {
-  EXIT_CODE=$?
+# NODE_NO_WARNINGS suppresses node deprecation warnings
+# grep filters remaining gemini CLI informational noise
+GEMINI_RAW=$(NODE_NO_WARNINGS=1 gemini -p "$QUESTION" 2>/dev/null)
+EXIT_CODE=$?
+
+GEMINI_RESPONSE=$(printf '%s\n' "$GEMINI_RAW" | python3 -c "
+import sys
+noise = [
+  'DeprecationWarning', 'punycode', 'node --trace', '(node:',
+  'Loaded cached credentials', 'Hook registry initialized',
+  'supports tool updates', 'Listening for changes',
+  'Retrying with backoff', 'GaxiosError', 'at async ',
+  'rateLimitExceeded', 'MODEL_CAPACITY', 'Attempt ', 'DEP0040',
+]
+for line in sys.stdin:
+    if not any(n in line for n in noise):
+        sys.stdout.write(line)
+" 2>/dev/null || printf '%s\n' "$GEMINI_RAW")
+
+if [ $EXIT_CODE -ne 0 ] || [ -z "$(echo "$GEMINI_RESPONSE" | tr -d '[:space:]')" ]; then
   echo ""
-  echo "[duk-market] @gemini 자동 호출 실패 (exit code: $EXIT_CODE)"
-  echo ""
-  case "$GEMINI_RESPONSE" in
+  echo "[duk-market] @gemini 자동 호출 실패"
+  ERRMSG=$(NODE_NO_WARNINGS=1 gemini -p "$QUESTION" 2>&1 || true)
+  case "$ERRMSG" in
     *"auth"*|*"login"*|*"credential"*)
-      echo "  원인: 인증 필요 → gemini auth login"
-      ;;
+      echo "  원인: 인증 필요 → gemini auth login" ;;
     *"not found"*|*"command not found"*)
-      echo "  원인: 설치 필요 → npm install -g @google/gemini-cli"
-      ;;
+      echo "  원인: 설치 필요 → npm install -g @google/gemini-cli" ;;
     *)
-      echo "  오류: $GEMINI_RESPONSE"
-      echo "  네트워크 연결을 확인하세요."
-      ;;
+      echo "  네트워크 연결을 확인하세요." ;;
   esac
   exit 0
-}
+fi
 
 # Output Gemini's response (injected into Claude's context)
 echo ""
