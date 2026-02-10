@@ -1,0 +1,6 @@
+{
+  "name": "duk-market",
+  "version": "0.2.0",
+  "description": "Claude Code 플러그인 모음",
+  "hooks": "./hooks.json"
+}
