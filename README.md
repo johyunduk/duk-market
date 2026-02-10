@@ -18,6 +18,16 @@ Claude Code 플러그인 모음 - 필요한 것만 골라서 설치하세요.
 /plugin install duk-laravel
 ```
 
+**3단계 — 훅 디스패처 설치 (최초 1회, 버전 업데이트 시 불필요)**
+
+훅이 버전 변경에 관계없이 항상 올바른 경로를 찾도록 디스패처를 설치합니다.
+
+```bash
+mkdir -p ~/.claude/duk-market
+curl -sSL https://raw.githubusercontent.com/johyunduk/duk-market/main/scripts/hook-dispatch.sh \
+  -o ~/.claude/duk-market/hook-dispatch.sh && chmod +x ~/.claude/duk-market/hook-dispatch.sh
+```
+
 ---
 
 ## 플러그인 목록
@@ -95,7 +105,8 @@ Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → �
 Docker가 설치되어 있어야 합니다. **플러그인 설치 후 최초 1회** 아래 명령을 실행하세요.
 
 ```bash
-bash ~/.claude/plugins/cache/duk-market/duk-memory/0.1.0/memory/scripts/setup.sh
+INSTALL=$(python3 -c "import json,os; d=json.load(open(os.path.expanduser('~/.claude/plugins/installed_plugins.json'))); print(d['plugins']['duk-memory@duk-market'][0]['installPath'])")
+bash "$INSTALL/memory/scripts/setup.sh"
 ```
 
 이미지 빌드 + 컨테이너 기동 + DB 초기화가 한 번에 처리됩니다. 이후 세션에서는 컨테이너가 중지 상태면 자동으로 재기동됩니다.
