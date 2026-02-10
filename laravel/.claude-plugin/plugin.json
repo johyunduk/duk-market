@@ -1,0 +1,17 @@
+{
+  "name": "duk-laravel",
+  "version": "0.1.0",
+  "description": "Laravel 코드 리뷰 - 구조/퍼포먼스/보안/아키텍처 자동 분석",
+  "author": {
+    "name": "johyunduk"
+  },
+  "repository": "https://github.com/johyunduk/duk-market",
+  "license": "MIT",
+  "keywords": [
+    "laravel",
+    "code-review",
+    "php",
+    "eloquent"
+  ],
+  "skills": "./skills/"
+}

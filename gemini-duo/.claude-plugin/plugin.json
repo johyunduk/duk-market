@@ -1,0 +1,20 @@
+{
+  "name": "duk-gemini-duo",
+  "version": "0.1.0",
+  "description": "Gemini CLI 연동 + 듀얼 AI 루프 - 분석은 Gemini, 구현은 Claude",
+  "author": {
+    "name": "johyunduk"
+  },
+  "repository": "https://github.com/johyunduk/duk-market",
+  "license": "MIT",
+  "keywords": [
+    "gemini",
+    "gemini-cli",
+    "ai-collaboration",
+    "duo-loop",
+    "code-review"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json"
+}

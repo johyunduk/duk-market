@@ -1,16 +1,18 @@
 # duk-market
 
-Claude Code 올인원 플러그인 - Gemini CLI 연동 + 로컬 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 코드 리뷰.
+Claude Code 플러그인 모음 - 필요한 것만 골라서 설치하세요.
 
-## 설치
+## 플러그인 목록
 
-```
-/plugin marketplace add https://github.com/johyunduk/duk-market
-```
+| 플러그인 | 설명 | 설치 |
+|---------|------|------|
+| [duk-gemini-duo](#1-duk-gemini-duo) | Gemini CLI 연동 + 듀얼 AI 루프 | `/plugin marketplace add https://github.com/johyunduk/duk-market/gemini-duo` |
+| [duk-memory](#2-duk-memory) | 로컬 메모리 + 스키마(DDL) 관리 | `/plugin marketplace add https://github.com/johyunduk/duk-market/memory` |
+| [duk-laravel](#3-duk-laravel) | Laravel 코드 리뷰 | `/plugin marketplace add https://github.com/johyunduk/duk-market/laravel` |
 
 ---
 
-## 1. Gemini CLI 연동
+## 1. duk-gemini-duo
 
 분석은 Gemini, 구현은 Claude Code - 두 AI의 장점을 결합합니다.
 
@@ -44,12 +46,31 @@ gemini auth login  # 또는 export GEMINI_API_KEY="your-key"
 /gemini-ask TypeScript 5.7 새 기능은?                 # 직접 질문
 ```
 
+### Duo Loop - 듀얼 AI 교차 검증 루프
+
+```
+Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → 재검증 → ... → 완료
+```
+
+```
+/duo-loop 사용자 인증 API를 JWT 기반으로 구현해줘
+/duo-loop 결제 시스템에 Stripe 연동 추가
+
+/duo-review src/api/                # 기존 코드 교차 검증
+/duo-review --focus security        # 보안 집중
+/duo-review src/ -r 5 --strict      # 엄격 모드 5라운드
+
+/duo-status            # 현재 루프 상태
+/duo-status --history  # 루프 히스토리
+```
+
+각 라운드에서 Gemini가 JSON 피드백(점수 1-10 + 이슈 목록)을 주면, Claude가 각 이슈를 수용/거부/보류로 평가 후 수정합니다. Gemini 점수 8/10 이상 또는 최대 라운드 도달 시 종료됩니다.
+
 ---
 
-## 2. 로컬 메모리 시스템
+## 2. duk-memory
 
 세션에서 얻은 지식을 로컬 SQLite DB(`~/.claude/duk-market.db`)에 저장합니다.
-claude-mem에서 영감을 받은 FTS5 전문 검색 기반 메모리 시스템입니다.
 
 ### 초기 설정
 
@@ -88,51 +109,18 @@ claude-mem에서 영감을 받은 FTS5 전문 검색 기반 메모리 시스템�
 /memory-summary             # 현재 세션 요약 저장
 ```
 
-### DB 구조
-
-```
-~/.claude/duk-market.db
-├── memories      # 지식 저장 (FTS5 인덱싱)
-├── schemas       # DDL 영구 저장 (버전 이력 관리)
-├── observations  # 자동 캡처된 도구 사용 기록
-├── sessions      # 세션 요약
-└── duo_loops     # Duo Loop 상태
-```
-
 ### 스키마(DDL) 영구 저장
-
-테이블 DDL을 **만료 없이 영구 보관**합니다. 일반 memories와 분리된 `schemas` 테이블에서 버전 이력을 관리합니다.
 
 ```
 /schema-save CREATE TABLE users (id INT PRIMARY KEY, name TEXT, email TEXT UNIQUE)
 /schema-save ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'
-```
 
-```
 /schema-list                    # 현재 프로젝트 테이블 현황 (최신 버전만)
 /schema-history users           # users 테이블의 v1→v2→v3 변경 이력
 ```
 
 - Bash에서 DDL 실행 시 **자동 감지/저장** (PostToolUse 훅)
-- `/schema-save`로 수동 저장도 가능
-- 세션 시작 시 컨텍스트에 주입하지 않음 (온디맨드 조회)
-
-### 자동 동작 (Hooks) - 수동 저장 불필요
-
-모든 메모리 캡처가 자동으로 이루어집니다:
-
-- **PostToolUse** (Write/Edit/Bash): 파일 수정, 명령 실행을 `observations` 테이블에 자동 기록 + DDL 감지 시 `schemas` 테이블에 영구 저장 (async)
-- **세션 종료 (Stop)**:
-  1. `auto-summary.sh`가 세션 요약을 `sessions` 테이블에 자동 저장 + 오래된 데이터 정리
-  2. agent 훅이 관찰 내용을 분석하여 중요한 것만 `memories` 테이블에 자동 INSERT (importance=3)
-- **세션 시작 (SessionStart)**: `load-context.sh`가 DB에서 직접 쿼리하여 zero-turn 컨텍스트 주입
-  - 이전 세션 요약 (최근 1건)
-  - 주요 결정사항 (최근 5건)
-  - 주의사항 (최근 5건)
-  - 최근 버그 수정 (7일 이내, 3건)
-  - 중단된 Duo Loop 감지
-
-`/memory-save`로 수동 저장도 가능하며, 수동 저장은 importance=5로 영구 보관됩니다.
+- 세션 시작 시 이전 요약/결정사항/버그 수정이 자동으로 컨텍스트에 주입됨
 
 ### 중요도 및 자동 만료
 
@@ -142,73 +130,9 @@ claude-mem에서 영감을 받은 FTS5 전문 검색 기반 메모리 시스템�
 | 3 | 자동 (Stop 훅) | `til` 카테고리만 90일 후 자동 삭제 |
 | - | `decision`, `pitfall` | 중요도 무관 영구 보관 |
 
-### 자동 정리 (Stop 훅)
-
-- 완료된 세션의 observations 자동 삭제
-- 30일 이상 된 observations 자동 삭제
-- sessions 테이블 최근 50건만 유지
-- importance ≤ 3인 `til` 카테고리 메모리 90일 후 자동 만료
-
 ---
 
-## 3. Duo Loop - 듀얼 AI 교차 검증 루프
-
-Ralph Wiggum의 자기 참조 루프에서 영감을 받아, **Gemini와 Claude가 서로를 검증**하는 반복 루프입니다.
-
-```
-Gemini 분석 → Claude 구현 → Gemini 검증 → Claude 평가/수정 → 재검증 → ... → 완료
-```
-
-### 전체 루프 실행
-
-```
-/duo-loop 사용자 인증 API를 JWT 기반으로 구현해줘
-/duo-loop 결제 시스템에 Stripe 연동 추가
-/duo-loop 테스트 커버리지 80% 이상으로 올려줘
-```
-
-### 기존 코드 검증 루프
-
-```
-/duo-review src/api/                # 디렉토리 교차 검증
-/duo-review src/auth/login.ts       # 특정 파일
-/duo-review --focus security        # 보안 집중
-/duo-review src/ -r 5 --strict      # 엄격 모드 5라운드
-```
-
-### 상태 확인
-
-```
-/duo-status            # 현재 루프 상태
-/duo-status --history  # 루프 히스토리
-```
-
-### 루프 동작 방식
-
-각 라운드에서:
-
-1. **Gemini 검증**: 코드를 `gemini -p`로 보내 JSON 형식의 리뷰 결과 수신
-2. **Claude 평가**: 각 이슈를 코드에서 직접 확인
-   - **수용**: 실제 문제 → 수정 진행
-   - **거부**: 오탐(false positive) → 근거와 함께 기각
-   - **보류**: 현재 스코프 밖 → 나중에 처리
-3. **수정**: 수용한 이슈를 Claude가 수정
-4. **재검증**: 수정된 코드를 Gemini에게 다시 전달
-
-**종료 조건**: Gemini가 PASS 판정 (8/10 이상) 또는 최대 라운드 도달
-
-```
-🏁 Duo Loop 완료
-━━━━━━━━━━━━━━━
-작업: JWT 인증 구현
-라운드: 3/5
-점수: 6 → 8 → 9 📈
-수정: 5개 수용, 2개 거부
-```
-
----
-
-## 4. Laravel 코드 리뷰
+## 3. duk-laravel
 
 CLAUDE.md 코딩 컨벤션 + Laravel 모범 사례 기준으로 코드를 리뷰합니다. Gemini 불필요, Claude 단독 수행.
 
@@ -240,47 +164,6 @@ CLAUDE.md 코딩 컨벤션 + Laravel 모범 사례 기준으로 코드를 리뷰
 `--fix` 옵션 사용 시 `critical`/`warning` 이슈를 자동 수정합니다.
 
 ---
-
-## 포함된 구성 요소
-
-### Skills
-
-| 커맨드 | 설명 |
-|--------|------|
-| `/gemini-analyze` | Gemini 분석 → Claude 구현 |
-| `/gemini-review` | Gemini 리뷰 → Claude 수정 |
-| `/gemini-research` | Gemini 리서치 → Claude 적용 |
-| `/gemini-ask` | Gemini에게 직접 질문 |
-| `/memory-save` | SQLite에 지식 저장 |
-| `/memory-recall` | FTS5 전문 검색 |
-| `/memory-list` | 메모리 목록/통계 |
-| `/memory-remove` | 메모리 삭제 |
-| `/memory-summary` | 세션 요약 저장 |
-| `/schema-save` | DDL 영구 저장 (버전 자동 관리) |
-| `/schema-list` | 프로젝트 스키마 현황 조회 |
-| `/schema-history` | 테이블별 DDL 변경 이력 |
-| `/laravel-review` | Laravel 전용 코드 리뷰 (구조/퍼포먼스/보안/아키텍처) |
-| `/duo-loop` | Gemini↔Claude 전체 루프 (분석→구현→검증→수정) |
-| `/duo-review` | 기존 코드에 교차 검증 루프 실행 |
-| `/duo-status` | 루프 진행 상태/히스토리 확인 |
-
-### Agents
-
-| 에이전트 | 설명 |
-|---------|------|
-| `gemini-bridge` | Gemini CLI 연동 브릿지 에이전트 |
-| `memory-manager` | SQLite 메모리 정리/품질 관리/CLAUDE.md 연동 에이전트 |
-| `duo-loop` | Gemini↔Claude 교차 검증 루프 관리 에이전트 |
-
-### Hooks
-
-| 이벤트 | 타입 | 설명 |
-|--------|------|------|
-| `UserPromptSubmit` | command | `auto-gemini.sh` - `@gemini` 키워드 감지 시 자동 Gemini 호출 |
-| `PreToolUse:Bash` | prompt | 외부 확장 설치 시 보안 패턴 검증 |
-| `PostToolUse:Write\|Edit\|Bash` | command (async) | 도구 사용 기록 자동 캡처 + DDL 감지 시 schemas에 영구 저장 |
-| `SessionStart` | command | `load-context.sh` - DB에서 직접 쿼리, zero-turn 컨텍스트 주입 |
-| `Stop` | command + agent | 세션 요약 저장 + 데이터 정리 + 조건부 메모리 자동 INSERT |
 
 ## 라이선스
 

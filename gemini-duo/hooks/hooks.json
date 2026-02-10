@@ -1,0 +1,14 @@
+{
+  "UserPromptSubmit": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "~/.claude/plugins/duk-gemini-duo/scripts/auto-gemini.sh",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
+}

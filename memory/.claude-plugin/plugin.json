@@ -1,23 +1,18 @@
 {
-  "name": "duk-market",
+  "name": "duk-memory",
   "version": "0.1.0",
-  "description": "Claude Code 올인원 플러그인 - Gemini CLI + 메모리(SQLite) + 스키마(DDL) 관리 + 듀얼 AI 루프 + Laravel 리뷰",
+  "description": "로컬 메모리 + 스키마(DDL) 관리 - SQLite 기반 지식 영속화",
   "author": {
     "name": "johyunduk"
   },
   "repository": "https://github.com/johyunduk/duk-market",
   "license": "MIT",
   "keywords": [
-    "gemini",
-    "gemini-cli",
-    "ai-collaboration",
     "memory",
     "sqlite",
     "schema",
     "ddl",
-    "duo-loop",
-    "laravel",
-    "code-review"
+    "knowledge"
   ],
   "skills": "./skills/",
   "agents": "./agents/",

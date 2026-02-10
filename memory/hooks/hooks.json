@@ -1,23 +1,11 @@
 {
-  "UserPromptSubmit": [
-    {
-      "matcher": "",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "~/.claude/plugins/duk-market/scripts/auto-gemini.sh",
-          "timeout": 30
-        }
-      ]
-    }
-  ],
   "PostToolUse": [
     {
       "matcher": "Write|Edit|Bash",
       "hooks": [
         {
           "type": "command",
-          "command": "~/.claude/plugins/duk-market/scripts/auto-observe.sh",
+          "command": "~/.claude/plugins/duk-memory/scripts/auto-observe.sh",
           "timeout": 5,
           "async": true
         }
@@ -30,7 +18,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "~/.claude/plugins/duk-market/scripts/load-context.sh",
+          "command": "~/.claude/plugins/duk-memory/scripts/load-context.sh",
           "timeout": 5
         }
       ]
@@ -42,7 +30,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "~/.claude/plugins/duk-market/scripts/auto-summary.sh",
+          "command": "~/.claude/plugins/duk-memory/scripts/auto-summary.sh",
           "timeout": 10
         },
         {
